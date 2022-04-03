@@ -1,5 +1,8 @@
 package com.example.app_footprint;
 
+/**
+ * 多线程延时类
+ */
 class RunnableDemo implements Runnable {
     private Thread t;
     private String threadName;
@@ -14,7 +17,7 @@ class RunnableDemo implements Runnable {
         try {
             for(int i = 4; i > 0; i--) {
                 System.out.println("Thread: " + threadName + ", " + i);
-                Thread.sleep(50);
+                Thread.sleep(500);
             }
         }catch (InterruptedException e) {
             System.out.println("Thread " +  threadName + " interrupted.");
@@ -28,16 +31,18 @@ class RunnableDemo implements Runnable {
             t = new Thread (this, threadName);
             t.start ();
         }
+
     }
 }
 
+/**
+ * 测试类， Thread
+ */
 class TestThread {
 
     public static void main(String args[]) {
         RunnableDemo R1 = new RunnableDemo( "Thread-1");
         R1.start();
 
-        RunnableDemo R2 = new RunnableDemo( "Thread-2");
-        R2.start();
     }
 }
