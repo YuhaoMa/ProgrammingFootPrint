@@ -92,7 +92,7 @@ public  void GenerateCode()
      */
   static class  emailTest {
       public static void main(String args[])  {
-          SendEmail email = new SendEmail("424224995@qq.com");
+          SendEmail email = new SendEmail("1298163609@qq.com");
           email.sendEmail("Test_Email","Test");
 
       }
