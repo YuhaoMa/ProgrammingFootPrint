@@ -1,6 +1,9 @@
 package com.example.app_footprint.module;
 
-import com.example.app_footprint.LoginContract;
+import com.example.app_footprint.presenter.ViewModeNoti;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,16 +13,15 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-public abstract class BaseGet implements LoginContract.Model {
-    private final static String basicURL = "https://studev.groept.be/api/a21pt105/";
-    public final static String newUser = "newUser";
-    //TODO: SQL
-    public String makeGETRequest(String urlName){
+public class LoginViewModel implements ViewModeNoti {
+
+    @Override
+    public String makeGETRequest(String email) {
         BufferedReader rd = null;
         StringBuilder sb = null;
         String line = null;
         try {
-            URL url = new URL(basicURL + urlName);
+            URL url = new URL(basicurl+"/"+email);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
@@ -38,5 +40,27 @@ public abstract class BaseGet implements LoginContract.Model {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public boolean checkUserInfo(String email, String password){
+        try {
+            if(email == null || password == null){
+                return false;
+            }
+            else {
+                JSONArray array = new JSONArray(makeGETRequest(email));
+                String emailCheck = array.getJSONObject(0).getString("emailaddress");
+                String passCheck = array.getJSONObject(0).getString("password");
+                if(emailCheck == email && passCheck == password){
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
