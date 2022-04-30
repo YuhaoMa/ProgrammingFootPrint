@@ -90,11 +90,11 @@ public  void GenerateCode()
     /**
      * Test SendEmail
      */
-  static class  emailTest {
+  /*static class  emailTest {
       public static void main(String args[])  {
           SendEmail email = new SendEmail("1298163609@qq.com");
           email.sendEmail("Test_Email","Test");
 
       }
-    }
+    }*/
 }

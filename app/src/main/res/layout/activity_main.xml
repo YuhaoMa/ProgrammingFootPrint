@@ -98,6 +98,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="60dp"
         android:background="#8F60E3"
+        android:onClick="onBtnRegister_Clicker"
         android:text="REGISTER"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
