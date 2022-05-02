@@ -42,7 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView errorMessage;
     private String number;
     private RequestQueue requestQueue;
-    private String basicurl = "https://studev.groept.be/api/a21pt105/";
+    //private String basicurl = "https://studev.groept.be/api/a21pt105/";
     private  String Sendcode;
 
     @Override
@@ -98,19 +98,8 @@ public class RegisterActivity extends AppCompatActivity {
             }
             else{
                 requestQueue = Volley.newRequestQueue(this);
-                JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
-                        basicurl+"newUser/"+textPassword+"/"+textEmail+"/"+textName,
-                        null,null,
-                        new Response.ErrorListener()
-                        {
-                            @Override
-                            public void onErrorResponse(VolleyError error)
-                            {
-                                errorMessage.setText(error.getLocalizedMessage());
-                            }
-                        }
-                );
-                requestQueue.add(submitRequest);
+                JsonArrayRequest submitRequest = new Json().newUser(textPassword,textEmail,textName,errorMessage);
+                 requestQueue.add(submitRequest);
             }
         }
     }
