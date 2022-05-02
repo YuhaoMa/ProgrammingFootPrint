@@ -17,6 +17,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.module.LoginViewModel;
 import com.example.app_footprint.presenter.ViewModeNoti;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
     private TextView sees;
     private String basicurl = "https://studev.groept.be/api/a21pt105/";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,42 +52,7 @@ public class MainActivity extends AppCompatActivity {
         String user = email.getText().toString();
         String password = passwd.getText().toString();
         requestQueue = Volley.newRequestQueue(this);
-        JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET, basicurl+"login/"+user
-                , null,
-                new Response.Listener<JSONArray>()
-                {
-                    @Override
-                    public void onResponse(JSONArray response)
-                    {
-                        try
-                        {
-                            String responseString = "";
-                            JSONObject curObject = response.getJSONObject( 0 );
-                            responseString = curObject.getString("Password").toString();
-                            if(responseString.equals(password) ){
-                                sees.setText("checked");
-                            }
-                            else {
-                                sees.setText("not correct");
-                            }
-                            //sees.setText(responseString);
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        sees.setText(error.getLocalizedMessage());
-                    }
-                }
-        );
-
+        JsonArrayRequest submitRequest = new Json().LogIn(user,password,sees);
         requestQueue.add(submitRequest);
     }
 
