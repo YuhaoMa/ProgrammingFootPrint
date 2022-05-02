@@ -25,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.GeneralSecurityException;
+
 public class MainActivity extends AppCompatActivity {
     private Button btnLogin;
     private Button btnRegister;

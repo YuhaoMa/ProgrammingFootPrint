@@ -10,12 +10,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.app_footprint.Email.GenerateCode;
+import com.example.app_footprint.Email.SendMailUtil;
+
+import java.security.GeneralSecurityException;
+import java.util.Properties;
+
+
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+
 
 public class RegisterActivity extends AppCompatActivity {
     private Button btnConfirm;
@@ -30,6 +43,7 @@ public class RegisterActivity extends AppCompatActivity {
     private String number;
     private RequestQueue requestQueue;
     private String basicurl = "https://studev.groept.be/api/a21pt105/";
+    private  String Sendcode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
         name = (TextView) findViewById(R.id.text_name);
         code = (TextView) findViewById(R.id.text_code);
         errorMessage = (TextView) findViewById(R.id.message);
+        Sendcode = null;
     }
 
     public void onBtnCancel_Clicker(View caller){
@@ -51,16 +66,18 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void onBtnSendEmail_Clicker(View caller){
+    public void onBtnSendEmail_Clicker(View caller) throws GeneralSecurityException {
         String textEmail = emailAddress.getText().toString();
         if(textEmail.equals("")){
             errorMessage.setText("The email is empty");
         }
         else{
-            SendEmail email = new SendEmail(textEmail);
-            email.sendEmail("Test email", "code");
+            GenerateCode generateCode = new GenerateCode(8);
+             Sendcode = generateCode.generateCode();
+            SendMailUtil.send(textEmail,Sendcode);
         }
-    }
+        }
+
 
     public void onBtnConfirm_Clicker(View Caller){
         String textEmail = emailAddress.getText().toString();
@@ -74,6 +91,10 @@ public class RegisterActivity extends AppCompatActivity {
         else{
             if(!textPassword.equals(textRepeatPassword)){
                 errorMessage.setText("The password is different.");
+            }
+            else if(code.getText().toString().equals(Sendcode)==false)
+            {
+                errorMessage.setText("Code incorrect!.");
             }
             else{
                 requestQueue = Volley.newRequestQueue(this);

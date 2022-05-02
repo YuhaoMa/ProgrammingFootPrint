@@ -118,7 +118,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:ems="10"
-        android:inputType="number"
         android:minHeight="48dp"
         app:layout_constraintStart_toStartOf="@+id/text_repeatPassword"
         app:layout_constraintTop_toBottomOf="@+id/textView8" />
