@@ -98,7 +98,8 @@ public class RegisterActivity extends AppCompatActivity {
             }
             else{
                 requestQueue = Volley.newRequestQueue(this);
-                JsonArrayRequest submitRequest = new Json().newUser(textPassword,textEmail,textName,errorMessage);
+                JsonArrayRequest submitRequest = Json.newUser(textPassword,textEmail,
+                        textName,errorMessage);
                  requestQueue.add(submitRequest);
             }
         }

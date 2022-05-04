@@ -15,8 +15,11 @@
             android:name=".UserActivity"
             android:exported="false" />
         <activity
+            android:name=".GroupActivity"
+            android:exported="true" />
+        <activity
             android:name=".RegisterActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

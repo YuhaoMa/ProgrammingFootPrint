@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
+import android.util.TimeUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +28,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private Button btnLogin;
@@ -35,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView passwd;
     private RequestQueue requestQueue;
     private TextView sees;
-    private String basicurl = "https://studev.groept.be/api/a21pt105/";
+    //private static ArrayList<String> groupNames = new ArrayList<>();
+    private static boolean check;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +56,30 @@ public class MainActivity extends AppCompatActivity {
         String user = email.getText().toString();
         String password = passwd.getText().toString();
         requestQueue = Volley.newRequestQueue(this);
-        JsonArrayRequest submitRequest = new Json().LogIn(user,password,sees);
+        JsonArrayRequest submitRequest = Json.LogIn(user,password,sees);
         requestQueue.add(submitRequest);
+        try{
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(check){
+            //JsonArrayRequest bRequest = Json.getGroup(user);
+            //requestQueue.add(bRequest);
+            Intent intent = new Intent(MainActivity.this,GroupActivity.class);
+            intent.putExtra("Names", user);
+            startActivity(intent);
+        }
     }
 
     public void onBtnRegister_Clicker(View Caller){
         Intent intent = new Intent(this,RegisterActivity.class);
         startActivity(intent);
     }
+
+    public static void setCheck(boolean x){
+        check = x;
+    }
+
 
 }

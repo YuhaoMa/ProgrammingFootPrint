@@ -21,16 +21,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class LoginViewModel {
-    private String basicurl = "https://studev.groept.be/api/a21pt105/";
-    private String emailAddress;
-    private String password;
+    private static ArrayList<String> groups = new ArrayList<>();
 
-    public LoginViewModel(String email, String pw){
-        emailAddress = email;
-        password = pw;
+    public static ArrayList<String> getGroups() {
+        return groups;
     }
 
-
+    public static void setGroups(String group) {
+        groups.add(group);
+    }
 }

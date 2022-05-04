@@ -10,18 +10,20 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.app_footprint.module.LoginViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLOutput;
+import java.util.Arrays;
+
 public class Json {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
-
-
     private static JSONObject jsonObject = null;
     private static JSONArray  jsonArray = null;
-    public JsonArrayRequest LogIn(String user, String password, TextView sees)
+    public static JsonArrayRequest LogIn(String user, String password, TextView sees)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"login/"+user
                 , null,
@@ -36,12 +38,12 @@ public class Json {
                             JSONObject curObject = response.getJSONObject( 0 );
                             responseString = curObject.getString("Password").toString();
                             if(responseString.equals(password) ){
-                                sees.setText("checked");
+                                MainActivity.setCheck(true);
+                                System.out.println("checked");
                             }
                             else {
-                                sees.setText("not correct");
+                                MainActivity.setCheck(false);
                             }
-                            //sees.setText(responseString);
                         }
                         catch( JSONException e )
                         {
@@ -61,7 +63,7 @@ public class Json {
         return jsonArrayRequest;
     }
 
-    public JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
+    public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"newUser/"+textPassword+"/"+textEmail+"/"+textName,
@@ -101,7 +103,7 @@ public class Json {
         );
         return jsonArrayRequest;
     }
-    public JsonArrayRequest getGroup(String user,TextView textView)
+    public static JsonArrayRequest getGroup(String user)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"getGroup/"+user
                 , null,
@@ -110,7 +112,21 @@ public class Json {
                     @Override
                     public void onResponse(JSONArray response)
                     {
-                        jsonArray = response;
+                        try
+                        {
+                            JSONObject curObject = new JSONObject();
+                            String responseString = "";
+                            for(int i = 0; i < response.length();i++){
+                                curObject = response.getJSONObject(i);
+                                responseString = curObject.getString("GroupName").toString();
+                                LoginViewModel.setGroups(responseString);
+                            }
+                            System.out.println(LoginViewModel.getGroups());
+                        }
+                        catch( JSONException e )
+                        {
+                            Log.e( "Database", e.getMessage(), e );
+                        }
                     }
                 },
                 new Response.ErrorListener()
@@ -118,7 +134,7 @@ public class Json {
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
-                        textView.setText(error.getLocalizedMessage());
+                        error.getLocalizedMessage();
                     }
                 }
         );
