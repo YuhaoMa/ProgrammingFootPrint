@@ -24,7 +24,13 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class LoginViewModel {
-    private static ArrayList<String> groups = new ArrayList<>();
+    private static ArrayList<String> groups;
+    private boolean check;
+
+    public LoginViewModel() {
+        this.check = true;
+        groups = new ArrayList<>();
+    }
 
     public static ArrayList<String> getGroups() {
         return groups;

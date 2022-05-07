@@ -1,6 +1,7 @@
 package com.example.app_footprint;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -24,6 +25,7 @@ public class Json {
     private static JSONObject jsonObject = null;
     private static JSONArray  jsonArray = null;
     public static JsonArrayRequest LogIn(String user, String password, TextView sees)
+
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"login/"+user
                 , null,
@@ -38,8 +40,9 @@ public class Json {
                             JSONObject curObject = response.getJSONObject( 0 );
                             responseString = curObject.getString("Password").toString();
                             if(responseString.equals(password) ){
-                                MainActivity.setCheck(true);
+                                //MainActivity.setCheck(true);
                                 System.out.println("checked");
+
                             }
                             else {
                                 MainActivity.setCheck(false);
