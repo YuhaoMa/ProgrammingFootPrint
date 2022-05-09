@@ -1,35 +1,33 @@
 package com.example.app_footprint;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.view.MenuItem;
 import android.widget.Toast;
+
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.app_footprint.databinding.ActivityMapsBinding;
 
-import java.util.List;
-
-public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements
+        GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -38,13 +36,37 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
     private final long MINI_TIME = 1000;
     private final long MINI_DIST = 10;
     private LatLng latLng;
+    private Toolbar mToolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setTitle("Common");
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int itemId = item.getItemId();
+                if(itemId == R.id.app_bar_search){
 
+                }
+                else if(itemId == R.id.action_item1){
+
+                }
+                else if(itemId == R.id.action_item2){
+
+                }
+                //else if(itemId == android.R.id.home){
+                //    finish();
+                //}
+                return true;
+            }
+        });
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -101,7 +123,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         };
 
         try{
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,MINI_TIME,MINI_DIST,locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,MINI_TIME,
+                    MINI_DIST,locationListener);
         }
         catch (SecurityException e){
             e.printStackTrace();
