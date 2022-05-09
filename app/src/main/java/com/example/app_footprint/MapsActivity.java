@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -37,15 +38,19 @@ public class MapsActivity extends AppCompatActivity implements
     private final long MINI_DIST = 10;
     private LatLng latLng;
     private Toolbar mToolbar;
+    private TextView UserName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        Bundle extras = getIntent().getExtras();
+        UserName = findViewById(R.id.usernametext);
+        UserName.setText((String)extras.get("username"));
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitle("Common");
-        setSupportActionBar(mToolbar);
+        /*setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -78,7 +83,7 @@ public class MapsActivity extends AppCompatActivity implements
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 PackageManager.PERMISSION_GRANTED);
-
+*/
     }
 
     /**

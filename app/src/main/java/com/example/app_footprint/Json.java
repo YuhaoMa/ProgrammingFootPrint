@@ -61,47 +61,6 @@ public class Json {
         return jsonArrayRequest;
 
     }
-    public static JsonArrayRequest LogIn(String user, String password, TextView sees)
-
-    {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"login/"+user
-                , null,
-                new Response.Listener<JSONArray>()
-                {
-                    @Override
-                    public void onResponse(JSONArray response)
-                    {
-                        try
-                        {
-                            String responseString = "";
-                            JSONObject curObject = response.getJSONObject( 0 );
-                            responseString = curObject.getString("Password").toString();
-                            if(responseString.equals(password) ){
-                                MainActivity.setCheck(true);
-                                System.out.println("checked");
-
-                            }
-                            else {
-                                MainActivity.setCheck(false);
-                            }
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        sees.setText(error.getLocalizedMessage());
-                    }
-                }
-        );
-        return jsonArrayRequest;
-    }
 
     public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
     {
@@ -137,6 +96,7 @@ public class Json {
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
+
                         textView.setText(error.getLocalizedMessage());
                     }
                 }

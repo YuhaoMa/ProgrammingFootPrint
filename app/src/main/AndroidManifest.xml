@@ -35,12 +35,6 @@
             android:exported="true"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".UserActivity"
-            android:exported="false" />
-        <activity
-            android:name=".GroupActivity"
-            android:exported="true" />
-        <activity
             android:name=".RegisterActivity"
             android:exported="true" />
         <activity

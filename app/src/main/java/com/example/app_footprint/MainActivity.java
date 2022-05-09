@@ -40,60 +40,66 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
     private TextView sees;
     private static ArrayList<ArrayList<String>> UserData;
-    //private static ArrayList<String> groupNames = new ArrayList<>();
-    private static boolean check;
+    private static boolean check = false;
+    private  String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btnLogin = (Button)findViewById(R.id.btn_login);
-        btnRegister = (Button)findViewById(R.id.btn_register);
+        btnLogin = (Button) findViewById(R.id.btn_login);
+        btnRegister = (Button) findViewById(R.id.btn_register);
         email = findViewById(R.id.txtName);
-        passwd = (TextView)findViewById(R.id.editTextTextPassword);
-        sees = findViewById((R.id.textView3));
+        passwd = (TextView) findViewById(R.id.editTextTextPassword);
+        sees = (TextView) findViewById((R.id.textView3));
         requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(Json.getUserData());
-       System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
     }
 
     public void onBtnLogin_Clicker(View caller) {
-        for(ArrayList<String> userData : UserData)
-        {
+        for (ArrayList<String> userData : UserData) {
             System.out.println(UserData);
         }
         String user = email.getText().toString();
         String password = passwd.getText().toString();
-        for(ArrayList<String> userData : UserData)
-        {
-            if(user.equals(userData.get(0)))
-            {
-                if(password.equals(userData.get(1)))
-                {
-                    Intent intent = new Intent(this,GroupActivity.class);
-                    startActivity(intent);
-                }
-                else
-                {
+        for (ArrayList<String> userData : UserData) {
+            if (user.equals(userData.get(0))) {
+                if (password.equals(userData.get(1))) {
+                    MainActivity.setCheck(true);
+                    setUsername(userData.get(2));
+                    System.out.println(userData+"\n +!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                } else {
                     System.out.println("Password is incorrect!!!!!!!!!!!!!!!!");
                 }
             }
         }
-
-
+        if (check) {
+            Intent intent = new Intent(this, MapsActivity.class);
+            intent.putExtra("username",username);
+            startActivity(intent);
+        }
     }
 
 
-
-    public void onBtnRegister_Clicker(View Caller){
-        Intent intent = new Intent(this,RegisterActivity.class);
+    public void onBtnRegister_Clicker(View Caller) {
+        Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
 
-    public static void setCheck(boolean x){
+    public static void setCheck(boolean x) {
         check = x;
     }
-public static void setUserData(ArrayList<ArrayList<String>> User){UserData=User;}
 
+    public static void setUserData(ArrayList<ArrayList<String>> User) {
+        UserData = User;
+    }
+
+
+    public  String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String name){username = name;}
 }
