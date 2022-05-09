@@ -1,29 +1,66 @@
 package com.example.app_footprint;
 
-import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.module.LoginViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.SQLOutput;
-import java.util.Arrays;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class Json {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
     private static JSONObject jsonObject = null;
     private static JSONArray  jsonArray = null;
+    public static JsonArrayRequest getUserData()
+    {
+        ArrayList<ArrayList<String>> UserData = new ArrayList<>();
+
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "UserData", null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try
+                        {
+                           for(int i=0;i<response.length();i++)
+                           {
+                               JSONObject curObject = response.getJSONObject( i );
+                               ArrayList<String> user = new ArrayList<>();
+                               user.add(curObject.getString("emailaddress").toString());
+                               user.add(curObject.getString("Password").toString());
+                               user.add(curObject.getString("Name").toString());
+                               user.add(curObject.getString("HeadPhoto").toString());
+                               UserData.add(user);
+                           }
+
+                        }
+                        catch( JSONException e )
+                        {
+                            Log.e( "Database", e.getMessage(), e );
+                        }
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        System.out.println("Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    }
+                }
+        );
+         MainActivity.setUserData(UserData);
+        return jsonArrayRequest;
+
+    }
     public static JsonArrayRequest LogIn(String user, String password, TextView sees)
 
     {
@@ -40,7 +77,7 @@ public class Json {
                             JSONObject curObject = response.getJSONObject( 0 );
                             responseString = curObject.getString("Password").toString();
                             if(responseString.equals(password) ){
-                                //MainActivity.setCheck(true);
+                                MainActivity.setCheck(true);
                                 System.out.println("checked");
 
                             }

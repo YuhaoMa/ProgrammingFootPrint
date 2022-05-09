@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.service.autofill.UserData;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.view.View;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView passwd;
     private RequestQueue requestQueue;
     private TextView sees;
+    private static ArrayList<ArrayList<String>> UserData;
     //private static ArrayList<String> groupNames = new ArrayList<>();
     private static boolean check;
 
@@ -50,27 +52,39 @@ public class MainActivity extends AppCompatActivity {
         email = findViewById(R.id.txtName);
         passwd = (TextView)findViewById(R.id.editTextTextPassword);
         sees = findViewById((R.id.textView3));
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(Json.getUserData());
+       System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
     }
 
-    public void onBtnLogin_Clicker(View caller){
+    public void onBtnLogin_Clicker(View caller) {
+        for(ArrayList<String> userData : UserData)
+        {
+            System.out.println(UserData);
+        }
         String user = email.getText().toString();
         String password = passwd.getText().toString();
-        requestQueue = Volley.newRequestQueue(this);
-        JsonArrayRequest submitRequest = Json.LogIn(user,password,sees);
-        requestQueue.add(submitRequest);
-        try{
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for(ArrayList<String> userData : UserData)
+        {
+            if(user.equals(userData.get(0)))
+            {
+                if(password.equals(userData.get(1)))
+                {
+                    Intent intent = new Intent(this,GroupActivity.class);
+                    startActivity(intent);
+                }
+                else
+                {
+                    System.out.println("Password is incorrect!!!!!!!!!!!!!!!!");
+                }
+            }
         }
-        if(check){
-            //JsonArrayRequest bRequest = Json.getGroup(user);
-            //requestQueue.add(bRequest);
-            Intent intent = new Intent(MainActivity.this,GroupActivity.class);
-            intent.putExtra("Names", user);
-            startActivity(intent);
-        }
+
+
     }
+
+
 
     public void onBtnRegister_Clicker(View Caller){
         Intent intent = new Intent(this,RegisterActivity.class);
@@ -80,6 +94,6 @@ public class MainActivity extends AppCompatActivity {
     public static void setCheck(boolean x){
         check = x;
     }
-
+public static void setUserData(ArrayList<ArrayList<String>> User){UserData=User;}
 
 }
