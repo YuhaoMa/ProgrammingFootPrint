@@ -1,7 +1,11 @@
 package com.example.app_footprint;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -16,14 +20,13 @@ import org.json.JSONObject;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class Json {
+public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
     private static JSONObject jsonObject = null;
     private static JSONArray  jsonArray = null;
     public static JsonArrayRequest getUserData()
     {
         ArrayList<ArrayList<String>> UserData = new ArrayList<>();
-
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "UserData", null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -62,6 +65,49 @@ public class Json {
 
     }
 
+    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent, Activity activity)
+    {
+        ArrayList<String> Userdata = new ArrayList<>();
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "getGroup/"+address, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        // System.out.println("response!!!!!!!!!!!!!!!!!!!"+response);
+                        try
+                        {
+                            for(int i=0;i<response.length();i++)
+                            {
+                                JSONObject curObject = response.getJSONObject( i );
+
+                                Userdata.add(curObject.getString("GroupName").toString());
+                                //System.out.println("!!!!!object+"+Userdata);
+                            }
+                            intent.putExtra("username",username);
+                            intent.putExtra("address",address);
+                            System.out.println("Userdata!!!!!!!!!"+Userdata);
+                            intent.putExtra("GroupInfo",Userdata);
+                            activity.startActivity(intent);
+                        }
+                        catch( JSONException e )
+                        {
+                            Log.e( "Database", e.getMessage(), e );
+                        }
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        System.out.println("Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    }
+                }
+        );
+        // System.out.println("find!!!!!!!!!!!!!!!!!!!!!!!!!!!"+Userdata);
+
+        return jsonArrayRequest;
+
+    }
     public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
@@ -79,7 +125,7 @@ public class Json {
         return submitRequest;
     }
 
-    public JsonArrayRequest getUserInfo(String email,TextView textView)
+public JsonArrayRequest getUserInfo(String email,TextView textView)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"getUserInfo/"+email
                 , null,

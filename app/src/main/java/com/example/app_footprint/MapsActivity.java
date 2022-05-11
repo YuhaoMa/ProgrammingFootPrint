@@ -9,12 +9,22 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.ActionProvider;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +37,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.app_footprint.databinding.ActivityMapsBinding;
 
+import java.security.acl.Group;
+import java.util.ArrayList;
+
 public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback {
 
@@ -36,9 +49,13 @@ public class MapsActivity extends AppCompatActivity implements
     private LocationManager locationManager;
     private final long MINI_TIME = 1000;
     private final long MINI_DIST = 10;
+    private Toolbar tToolbar;
+    private Toolbar bToolbar;
     private LatLng latLng;
-    private Toolbar mToolbar;
-    private TextView UserName;
+    private ImageButton homeBtn;
+    private ImageButton searchBtn;
+    private  ImageButton newBtn;
+    private ArrayList<String> groups;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,46 +63,18 @@ public class MapsActivity extends AppCompatActivity implements
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Bundle extras = getIntent().getExtras();
-        UserName = findViewById(R.id.usernametext);
-        UserName.setText((String)extras.get("username"));
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitle("Common");
-        /*setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                int itemId = item.getItemId();
-                if(itemId == R.id.app_bar_search){
+        tToolbar = (Toolbar) findViewById(R.id.toolbar);
+        tToolbar.setTitle((String) extras.get("username"));
+        setSupportActionBar(tToolbar);
+        bToolbar = (Toolbar) findViewById(R.id.toolbar3);
+        homeBtn =(ImageButton) findViewById(R.id.HomeBtn);
+        searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
+        newBtn = (ImageButton) findViewById(R.id.AddBtn);
+        groups =(ArrayList<String>) extras.get("GroupInfo");
 
-                }
-                else if(itemId == R.id.action_item1){
-
-                }
-                else if(itemId == R.id.action_item2){
-
-                }
-                //else if(itemId == android.R.id.home){
-                //    finish();
-                //}
-                return true;
-            }
-        });
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                PackageManager.PERMISSION_GRANTED);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                PackageManager.PERMISSION_GRANTED);
-*/
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+/n" +
+                groups);
     }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -105,10 +94,10 @@ public class MapsActivity extends AppCompatActivity implements
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                    latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.clear();
-                    mMap.addMarker(new MarkerOptions().position(latLng).title("My Position"));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(latLng).title("My Position"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             }
 
             @Override
@@ -127,16 +116,14 @@ public class MapsActivity extends AppCompatActivity implements
             }
         };
 
-        try{
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,MINI_TIME,
-                    MINI_DIST,locationListener);
-        }
-        catch (SecurityException e){
+        try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MINI_TIME,
+                    MINI_DIST, locationListener);
+        } catch (SecurityException e) {
             e.printStackTrace();
         }
 
     }
-
 
     @Override
     public boolean onMyLocationButtonClick() {
@@ -145,4 +132,17 @@ public class MapsActivity extends AppCompatActivity implements
         return false;
     }
 
+    public void onBtnHome_Clicked(View caller) {
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maps_menu,menu);
+    for(int i =0 ; i<groups.size();i++)
+        {
+            menu.add(1,1,i,groups.get(i));
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
 }

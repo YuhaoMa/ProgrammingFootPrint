@@ -3,6 +3,7 @@ package com.example.app_footprint;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -42,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private static ArrayList<ArrayList<String>> UserData;
     private static boolean check = false;
     private  String username;
-
+    private  String address;
+   private static ArrayList<String> GroupInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +56,13 @@ public class MainActivity extends AppCompatActivity {
         sees = (TextView) findViewById((R.id.textView3));
         requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(Json.getUserData());
-        System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+       // System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+UserData);
 
     }
 
     public void onBtnLogin_Clicker(View caller) {
+        System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+UserData);
+        requestQueue = Volley.newRequestQueue(this);
         for (ArrayList<String> userData : UserData) {
             System.out.println(UserData);
         }
@@ -69,21 +73,25 @@ public class MainActivity extends AppCompatActivity {
                 if (password.equals(userData.get(1))) {
                     MainActivity.setCheck(true);
                     setUsername(userData.get(2));
-                    System.out.println(userData+"\n +!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    setEmail(userData.get(0));
+                   // System.out.println(userData+"\n +!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 } else {
                     System.out.println("Password is incorrect!!!!!!!!!!!!!!!!");
                 }
             }
         }
         if (check) {
-            Intent intent = new Intent(this, MapsActivity.class);
-            intent.putExtra("username",username);
-            startActivity(intent);
+            setCheck(false);
+            Intent intent = new Intent(this,MapsActivity.class);
+           requestQueue.add(Json.LoginSuccessfully(user,username,intent,this));
+
         }
+
     }
 
 
     public void onBtnRegister_Clicker(View Caller) {
+        //Intent intent = new Intent(this, RegisterActivity.class);
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
@@ -100,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
     public  String getUsername() {
         return username;
     }
-
+    public void setEmail(String Emailaddress){ address = Emailaddress;}
     public void setUsername(String name){username = name;}
+
 }

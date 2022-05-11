@@ -103,5 +103,8 @@ public class RegisterActivity extends AppCompatActivity {
                  requestQueue.add(submitRequest);
             }
         }
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
+
 }
