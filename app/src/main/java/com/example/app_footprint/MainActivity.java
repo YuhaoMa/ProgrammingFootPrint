@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         sees = (TextView) findViewById((R.id.textView3));
         requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(Json.getUserData());
-       // System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+UserData);
 
     }
 
@@ -74,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.setCheck(true);
                     setUsername(userData.get(2));
                     setEmail(userData.get(0));
-                   // System.out.println(userData+"\n +!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 } else {
                     System.out.println("Password is incorrect!!!!!!!!!!!!!!!!");
                 }

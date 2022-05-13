@@ -1,5 +1,7 @@
 package com.example.app_footprint;
 
+import static com.example.app_footprint.MapsActivity.getmMap;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
@@ -12,6 +14,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.example.app_footprint.module.LoginViewModel;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +31,8 @@ public class Json extends AppCompatActivity {
     public static JsonArrayRequest getUserData()
     {
         ArrayList<ArrayList<String>> UserData = new ArrayList<>();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "UserData", null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url + "UserData", null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
@@ -65,22 +70,21 @@ public class Json extends AppCompatActivity {
 
     }
 
-    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent, Activity activity)
+    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent
+            , Activity activity)
     {
         ArrayList<String> Userdata = new ArrayList<>();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "getGroup/"+address, null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                url+ "getGroup/"+address, null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        // System.out.println("response!!!!!!!!!!!!!!!!!!!"+response);
                         try
                         {
                             for(int i=0;i<response.length();i++)
                             {
                                 JSONObject curObject = response.getJSONObject( i );
-
                                 Userdata.add(curObject.getString("GroupName").toString());
-                                //System.out.println("!!!!!object+"+Userdata);
                             }
                             intent.putExtra("username",username);
                             intent.putExtra("address",address);
@@ -103,12 +107,12 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-        // System.out.println("find!!!!!!!!!!!!!!!!!!!!!!!!!!!"+Userdata);
 
         return jsonArrayRequest;
 
     }
-    public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
+    public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName
+            ,TextView errorMessage)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"newUser/"+textPassword+"/"+textEmail+"/"+textName,
@@ -187,6 +191,66 @@ public JsonArrayRequest getUserInfo(String email,TextView textView)
         return jsonArrayRequest;
     }
 
+    public static JsonArrayRequest getMyPosition(String user){
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                url+"getMyPosition/"+user
+                , null,
+                new Response.Listener<JSONArray>()
+                {
+                    @Override
+                    public void onResponse(JSONArray response)
+                    {
+                        System.out.println("Response!!!!!!!!!");
+                        try
+                        {
+                            JSONObject curObject = new JSONObject();
+                            LatLng latLng ;
+                            for(int i = 0; i < response.length();i++){
+                                curObject = response.getJSONObject(i);
+                                latLng = new LatLng(
+                                        Double.parseDouble(curObject.getString("latitude")),
+                                        Double.parseDouble(curObject.getString("longitude")));
+                                getmMap().addMarker(new MarkerOptions().position(latLng)
+                                        .title(curObject.getString("date"))
+                                        .snippet("Population: 4,137,400"));
+                            }
+                        }
+                        catch( JSONException e )
+                        {
+                            Log.e( "Database", e.getMessage(), e );
+                        }
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        error.getLocalizedMessage();
+                    }
+                }
+        );
+        return jsonArrayRequest;
+    }
+
+    public static JsonArrayRequest newPosition(String lat,String log, String date,String label
+            ,String user)
+    {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                url+"newPosition/"+lat+"/"+log+"/"+date+"/"+label+"/"+user
+                , null, null,
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        error.getLocalizedMessage();
+                    }
+                }
+        );
+        return jsonArrayRequest;
+
+    }
     public static JSONObject getJsonObject() {
         return jsonObject;
     }

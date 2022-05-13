@@ -40,9 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView code;
     private TextView name;
     private TextView errorMessage;
-    private String number;
     private RequestQueue requestQueue;
-    //private String basicurl = "https://studev.groept.be/api/a21pt105/";
     private  String Sendcode;
 
     @Override
@@ -76,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
              Sendcode = generateCode.generateCode();
             SendMailUtil.send(textEmail,Sendcode);
         }
-        }
+    }
 
 
     public void onBtnConfirm_Clicker(View Caller){

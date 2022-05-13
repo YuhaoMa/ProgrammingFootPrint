@@ -29,6 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,12 +40,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.app_footprint.databinding.ActivityMapsBinding;
 
 import java.security.acl.Group;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback {
 
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
     private ActivityMapsBinding binding;
     private LocationListener locationListener;
     private LocationManager locationManager;
@@ -56,6 +61,8 @@ public class MapsActivity extends AppCompatActivity implements
     private ImageButton searchBtn;
     private  ImageButton newBtn;
     private ArrayList<String> groups;
+    private RequestQueue requestQueue;
+    private String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +78,17 @@ public class MapsActivity extends AppCompatActivity implements
         searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
         newBtn = (ImageButton) findViewById(R.id.AddBtn);
         groups =(ArrayList<String>) extras.get("GroupInfo");
-
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+/n" +
-                groups);
+        address = (String) extras.get("address");
+        requestQueue = Volley.newRequestQueue(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                PackageManager.PERMISSION_GRANTED);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                PackageManager.PERMISSION_GRANTED);
     }
     /**
      * Manipulates the map once available.
@@ -90,13 +105,17 @@ public class MapsActivity extends AppCompatActivity implements
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
+        requestQueue.add(Json.getMyPosition(address));
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(latLng).title("My Position"));
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/mm/dd");
+                Calendar cal = Calendar.getInstance();
+                requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
+                        String.valueOf(location.getLongitude()),dateFormat.format(cal.getTime())
+                        ,"label","user"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             }
 
@@ -144,5 +163,9 @@ public class MapsActivity extends AppCompatActivity implements
             menu.add(1,1,i,groups.get(i));
         }
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public static GoogleMap getmMap() {
+        return mMap;
     }
 }
