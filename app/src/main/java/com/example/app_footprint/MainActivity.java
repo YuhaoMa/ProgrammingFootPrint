@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         sees = (TextView) findViewById((R.id.textView3));
         requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(Json.getUserData());
+        requestQueue.add(Json.showPhoto());
 
     }
 

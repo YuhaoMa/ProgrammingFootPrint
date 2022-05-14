@@ -2,6 +2,7 @@ package com.example.app_footprint;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -12,11 +13,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.ActionProvider;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -38,16 +42,20 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.app_footprint.databinding.ActivityMapsBinding;
 
 import java.security.acl.Group;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MapsActivity extends AppCompatActivity implements
-        GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback {
+        GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private RequestQueue requestQueue;
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
     private ActivityMapsBinding binding;
     private LocationListener locationListener;
     private LocationManager locationManager;
@@ -60,24 +68,55 @@ public class MapsActivity extends AppCompatActivity implements
     private ImageButton searchBtn;
     private  ImageButton newBtn;
     private ArrayList<String> groups;
-    private  String userAddress ;
+    private String address;
+    private int PICK_IMAGE_REQUEST = 111;
+    private String userAddress;
+    private Bitmap bitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        requestQueue = Volley.newRequestQueue(this);
+        //requestQueue.add(Json.showPhoto());
         Bundle extras = getIntent().getExtras();
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         tToolbar.setTitle((String) extras.get("username"));
         setSupportActionBar(tToolbar);
+
+        Intent intent = new Intent(this,PhotoActivity.class);
+        tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int itemId = item.getItemId();
+                if(itemId == R.id.addP){
+                    startActivity(intent);
+                }
+                else{
+                    mMap.clear();
+                    requestQueue.add(Json.getGroupPosition(item.toString()));
+                }
+                return true;
+            }
+
+        });
         bToolbar = (Toolbar) findViewById(R.id.toolbar3);
         homeBtn =(ImageButton) findViewById(R.id.HomeBtn);
         searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
         newBtn = (ImageButton) findViewById(R.id.AddBtn);
         groups =(ArrayList<String>) extras.get("GroupInfo");
-        userAddress = (String)extras.get("address");
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+/n" +
-                groups);
+        address = (String) extras.get("address");
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                PackageManager.PERMISSION_GRANTED);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                PackageManager.PERMISSION_GRANTED);
     }
     /**
      * Manipulates the map once available.
@@ -94,13 +133,18 @@ public class MapsActivity extends AppCompatActivity implements
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMarkerClickListener(this);
+        requestQueue.add(Json.getMyPosition(address));
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(latLng).title("My Position"));
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/mm/dd");
+                Calendar cal = Calendar.getInstance();
+                requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
+                        String.valueOf(location.getLongitude()),dateFormat.format(cal.getTime())
+                        ,"label","user"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             }
 
@@ -129,6 +173,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     }
 
+
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT)
@@ -155,11 +200,28 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maps_menu,menu);
-    for(int i =0 ; i<groups.size();i++)
+        for(int i =0 ; i<groups.size();i++)
         {
             menu.add(1,1,i,groups.get(i));
         }
         return super.onCreateOptionsMenu(menu);
     }
 
+
+
+    public static GoogleMap getmMap() {
+        return mMap;
+    }
+
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        Intent intent = new Intent(this,ShowActivity.class);
+        startActivity(intent);
+        Toast.makeText(this,
+                marker.getTitle() +
+                        " has been clicked " + " times.",
+                Toast.LENGTH_SHORT).show();
+        return false;
+    }
 }
