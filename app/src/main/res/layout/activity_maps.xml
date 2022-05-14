@@ -58,6 +58,7 @@
         android:id="@+id/SearchBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="showDialog"
         android:src="@android:drawable/ic_menu_search"
         app:layout_constraintBottom_toBottomOf="@+id/map"
         app:layout_constraintEnd_toStartOf="@+id/AddBtn"

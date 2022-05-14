@@ -1,10 +1,13 @@
 package com.example.app_footprint;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
@@ -33,16 +36,16 @@ public class Json extends AppCompatActivity {
                     public void onResponse(JSONArray response) {
                         try
                         {
-                           for(int i=0;i<response.length();i++)
-                           {
-                               JSONObject curObject = response.getJSONObject( i );
-                               ArrayList<String> user = new ArrayList<>();
-                               user.add(curObject.getString("emailaddress").toString());
-                               user.add(curObject.getString("Password").toString());
-                               user.add(curObject.getString("Name").toString());
-                               user.add(curObject.getString("HeadPhoto").toString());
-                               UserData.add(user);
-                           }
+                            for(int i=0;i<response.length();i++)
+                            {
+                                JSONObject curObject = response.getJSONObject( i );
+                                ArrayList<String> user = new ArrayList<>();
+                                user.add(curObject.getString("emailaddress").toString());
+                                user.add(curObject.getString("Password").toString());
+                                user.add(curObject.getString("Name").toString());
+                                user.add(curObject.getString("HeadPhoto").toString());
+                                UserData.add(user);
+                            }
 
                         }
                         catch( JSONException e )
@@ -60,7 +63,7 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-         MainActivity.setUserData(UserData);
+        MainActivity.setUserData(UserData);
         return jsonArrayRequest;
 
     }
@@ -106,6 +109,73 @@ public class Json extends AppCompatActivity {
         // System.out.println("find!!!!!!!!!!!!!!!!!!!!!!!!!!!"+Userdata);
 
         return jsonArrayRequest;
+
+    }
+    public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder, Activity activity )
+    {
+         ArrayList<String> codes = new ArrayList<String>();
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "searchGroupCode", null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+
+                        try
+                        {
+                            for(int i=0;i<response.length();i++)
+                            {
+                                JSONObject curObject = response.getJSONObject( i );
+                                System.out.println("Group Code INfo:::::::::::::::"+curObject);
+                                codes.add(curObject.get("code").toString());
+                            }
+                        }
+                        catch( JSONException e )
+                        {
+                            Log.e( "Database", e.getMessage(), e );
+                        }
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        System.out.println("Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    }
+                }
+        );
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("你输入的是: " + code.getText().toString());
+                        AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
+                        builder1.setTitle("Reminder");
+                        boolean check = false;
+                        for(int i =0 ; i< codes.size();i++)
+                        {
+                            if(codes.get(i).equals(code.getText().toString()))
+                            {
+                               check = true;
+                            }
+                        }
+                        if(check)
+                        {
+                            builder1.setMessage("You've successfully joined a new group");
+                        }
+                        else
+                        {
+                            builder1.setMessage("Error code, the group does not exist");
+                        }
+
+                        builder1.setPositiveButton("OK",null);
+                        AlertDialog dialog1=builder1.create();
+                        dialog1.show();
+                    }
+                });
+                AlertDialog dialog=builder.create();
+                dialog.show();
+                return jsonArrayRequest;
+
 
     }
     public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)

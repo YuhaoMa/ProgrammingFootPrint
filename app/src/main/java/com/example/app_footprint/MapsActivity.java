@@ -1,6 +1,7 @@
 package com.example.app_footprint;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -9,6 +10,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -24,11 +26,14 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,7 +47,7 @@ import java.util.ArrayList;
 
 public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback {
-
+    private RequestQueue requestQueue;
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     private LocationListener locationListener;
@@ -136,6 +141,18 @@ public class MapsActivity extends AppCompatActivity implements
         Intent intent = new Intent(this,MainActivity.class);
         startActivity(intent);
     }
+
+    public void showDialog(View view){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        EditText code = new EditText(this);
+        builder.setTitle("Search Group");
+        builder.setMessage("Please enter the code of the group you want to join");
+        builder.setView(code);
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(Json.SearchGroup(code,builder,this));
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maps_menu,menu);
@@ -145,4 +162,5 @@ public class MapsActivity extends AppCompatActivity implements
         }
         return super.onCreateOptionsMenu(menu);
     }
+
 }
