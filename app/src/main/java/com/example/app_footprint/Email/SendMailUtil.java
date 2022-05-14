@@ -13,8 +13,8 @@ public class SendMailUtil {
     private static final String FROM_PSW = "duvmiukpdyqobhjh";//发送方邮箱授权码
 
 
-    public static void send(final File file, String toAdd, String code) {
-        final MailInfo mailInfo = creatMail(toAdd, code);
+    public static void send(final File file, String toAdd, String code,int type , String groupName) {
+        final MailInfo mailInfo = creatMail(toAdd, code,type,groupName);
         final MailSender sms = new MailSender();
         new Thread(new Runnable() {
             @Override
@@ -24,8 +24,8 @@ public class SendMailUtil {
         }).start();
     }
 
-    public static void send(String toAdd, String code) {
-        final MailInfo mailInfo = creatMail(toAdd, code);
+    public static void send(String toAdd, String code,int type,String groupName) {
+        final MailInfo mailInfo = creatMail(toAdd, code,type,groupName);
         final MailSender sms = new MailSender();
         new Thread(new Runnable() {
             @Override
@@ -35,7 +35,7 @@ public class SendMailUtil {
         }).start();
     }
 
-    private static MailInfo creatMail(String toAdd, String code) {
+    private static MailInfo creatMail(String toAdd, String code,int type,String groupName) {
         final MailInfo mailInfo = new MailInfo();
         mailInfo.setMailServerHost(HOST);
         mailInfo.setMailServerPort(PORT);
@@ -45,9 +45,18 @@ public class SendMailUtil {
         mailInfo.setFromAddress(FROM_ADD); // 发送的邮箱
         mailInfo.setToAddress(toAdd); // 发到哪个邮件去
         mailInfo.setSubject("This is your FootPrint verification code!"); // 邮件主题
+    switch (type){
+        case 1:
+            mailInfo.setContent("Please copy the 8-bit verification code below." +
+                    "To complete the registration" + code); // 注册用户邮件文本
+            break;
+        case 2:
+            mailInfo.setContent("Congratulations! Your \""+groupName+"\" group has been created successfully!\n" +
+                    "Please save the invitation code: "+code+".\n" +
+                    "Send invitation codes to invite others to join your group!🙂"); // 注册group邮件文本
+    }
 
-        mailInfo.setContent("Please copy the 8-bit verification code below." +
-                "To complete the registration" + code); // 邮件文本
+
         return mailInfo;
     }
 
