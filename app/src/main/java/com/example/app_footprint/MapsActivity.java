@@ -60,7 +60,7 @@ public class MapsActivity extends AppCompatActivity implements
     private ImageButton searchBtn;
     private  ImageButton newBtn;
     private ArrayList<String> groups;
-
+    private  String userAddress ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +75,7 @@ public class MapsActivity extends AppCompatActivity implements
         searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
         newBtn = (ImageButton) findViewById(R.id.AddBtn);
         groups =(ArrayList<String>) extras.get("GroupInfo");
-
+        userAddress = (String)extras.get("address");
         System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+/n" +
                 groups);
     }
@@ -148,7 +148,7 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setMessage("Please enter the code of the group you want to join");
         builder.setView(code);
         requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.SearchGroup(code,builder,this));
+        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress));
 
     }
 
@@ -161,4 +161,5 @@ public class MapsActivity extends AppCompatActivity implements
         }
         return super.onCreateOptionsMenu(menu);
     }
+
 }
