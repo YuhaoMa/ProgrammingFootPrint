@@ -123,6 +123,7 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
 
     }
+
     public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder, Activity activity,String address )
     {
         ArrayList<String> codes = new ArrayList<String>();
@@ -196,6 +197,7 @@ public class Json extends AppCompatActivity {
 
 
     }
+
     public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
@@ -212,6 +214,7 @@ public class Json extends AppCompatActivity {
         );
         return submitRequest;
     }
+
     public static JsonArrayRequest insertNewGroup(String user, String code )
     {
     JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"addGroup/"+user+"/"+code
@@ -261,6 +264,7 @@ public class Json extends AppCompatActivity {
         );
         return jsonArrayRequest;
     }
+
     public static JsonArrayRequest getGroup(String user)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"getGroup/"+user

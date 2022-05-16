@@ -59,7 +59,7 @@ public class Position {
         this.positionId = positionId;
         this.groupId = groupId;
         byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
-        bitmap = BitmapFactory.decodeByteArray( imageBytes, 0, imageBytes.length );
+        this.bitmap = BitmapFactory.decodeByteArray( imageBytes, 0, imageBytes.length );
     }
 
     public Bitmap getBitmap() {
