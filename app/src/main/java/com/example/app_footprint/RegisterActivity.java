@@ -72,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
         else{
             GenerateCode generateCode = new GenerateCode(8);
              Sendcode = generateCode.generateCode();
-            SendMailUtil.send(textEmail,Sendcode);
+            SendMailUtil.send(textEmail,Sendcode,1,null);
         }
     }
 

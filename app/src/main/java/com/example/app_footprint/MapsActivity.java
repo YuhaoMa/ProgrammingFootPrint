@@ -10,7 +10,9 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -36,7 +38,10 @@ import android.widget.Toast;
 
 
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.app_footprint.Email.GenerateCode;
+import com.example.app_footprint.Email.SendMailUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -186,17 +191,29 @@ public class MapsActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    public void showDialog(View view){
+    public void searchGroup(View view){
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         EditText code = new EditText(this);
         builder.setTitle("Search Group");
         builder.setMessage("Please enter the code of the group you want to join");
         builder.setView(code);
+        Intent intent = new Intent(this,MapsActivity.class);
         requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress));
+        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,tToolbar.getTitle().toString(),intent));
 
     }
-
+    public void createGroup(View view)
+    {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        EditText groupName = new EditText(this);
+        builder.setTitle("Create a new Group");
+        builder.setMessage("Enter the name of the group");
+        builder.setView(groupName);
+        Intent intent = new Intent(this,MapsActivity.class);
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(Json.createNewGroup(groupName,userAddress,tToolbar.getTitle().toString(),
+                this,intent,builder));
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maps_menu,menu);
