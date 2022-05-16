@@ -73,7 +73,6 @@ public class MapsActivity extends AppCompatActivity implements
     private ImageButton searchBtn;
     private  ImageButton newBtn;
     private ArrayList<String> groups;
-    private String address;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
     private Bitmap bitmap;
@@ -112,7 +111,7 @@ public class MapsActivity extends AppCompatActivity implements
         searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
         newBtn = (ImageButton) findViewById(R.id.AddBtn);
         groups =(ArrayList<String>) extras.get("GroupInfo");
-        address = (String) extras.get("address");
+        userAddress = (String) extras.get("address");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -139,7 +138,7 @@ public class MapsActivity extends AppCompatActivity implements
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMarkerClickListener(this);
-        requestQueue.add(Json.getMyPosition(address));
+        requestQueue.add(Json.getMyPosition(userAddress));
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override

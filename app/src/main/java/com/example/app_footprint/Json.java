@@ -257,10 +257,7 @@ public class Json extends AppCompatActivity {
         GenerateCode generateCode = new GenerateCode(3);
         String Sendcode = generateCode.generateCode();
         System.out.println("Genearate a new Groupcode:::: "+Sendcode);
-
-
-
-                System.out.println("Create a new Group name is :::: "+groupName.getText().toString());
+        System.out.println("Create a new Group name is :::: "+groupName.getText().toString());
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"createGroup/"+Sendcode+"/"+
                 groupName.getText().toString()
                 , null,
@@ -289,7 +286,7 @@ public class Json extends AppCompatActivity {
                 AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
                 builder1.setTitle("Reminder");
                 RequestQueue requestQueue = Volley.newRequestQueue(activity);
-
+                System.out.println("GroupName:::::"+groupName.getText().toString());
                 if(groupName.getText().toString()!= null)
                 {
                     builder1.setMessage("The group \""+groupName.getText().toString()+"\" was created successfully!\n" +
@@ -533,6 +530,33 @@ public class Json extends AppCompatActivity {
 
     }
 
+    public static JsonArrayRequest changePassword(String password, String emailaddress, Intent intent, AlertDialog.Builder builder, Activity activity)
+    {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                url+"changePassword/"+password+"/"+emailaddress, null,
+                new Response.Listener<JSONArray>()
+                {
+                    @Override
+                    public void onResponse(JSONArray response)
+                    {
+
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        error.getLocalizedMessage();
+                    }
+                }
+        );
+        AlertDialog dialog3 = builder.create();
+        dialog3.show();
+        activity.startActivity(intent);
+        return jsonArrayRequest;
+
+    }
     public static Model getModel() {
         return model;
     }
