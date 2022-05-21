@@ -4,24 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="20dp"
     tools:context=".PhotoActivity">
 
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
         android:onClick="onBtnPickClicked"
-        android:text="Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Choose From Gallery"
+        app:layout_constraintTop_toBottomOf="@+id/img_choose" />
 
     <ImageView
         android:id="@+id/img_choose"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="400px"
+        android:layout_height="400px"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/default_pic"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/record_back"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
@@ -29,18 +32,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onClick_close"
-        app:layout_constraintTop_toBottomOf="@+id/img_choose"
-        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
-        tools:layout_editor_absoluteX="49dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="208dp"
+        android:layout_marginStart="172dp"
         android:onClick="onBtnPostClicked"
-        android:text="Button"
-        app:layout_constraintStart_toEndOf="@+id/button"
-        tools:layout_editor_absoluteY="0dp" />
+        android:text="Upload"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.821"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date"
+        app:layout_constraintTop_toBottomOf="@+id/button"
+        tools:layout_editor_absoluteX="83dp" />
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="user"
+        app:layout_constraintTop_toBottomOf="@+id/textView9"
+        tools:layout_editor_absoluteX="84dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

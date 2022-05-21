@@ -24,16 +24,16 @@ import java.util.Map;
 
 public class ShowActivity extends AppCompatActivity {
     private GridView gridView;
-    private List<Map<String,Object>> data;
+    private static List<Map<String,Object>> data = new ArrayList<Map<String, Object>>();
     private SimpleAdapter simpleAdapter;
-
+    //private Bundle extras;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show);
-        data = new ArrayList<Map<String, Object>>();
+        displayData();
         gridView = (GridView) findViewById(R.id.view_photo);
-        simpleAdapter = new SimpleAdapter(this,getData(),R.layout.grid_item,
+        simpleAdapter = new SimpleAdapter(this,data,R.layout.grid_item,
                 new String[]{"img","txt"},new int[]{R.id.img_item,R.id.txt_item});
         simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
@@ -49,13 +49,20 @@ public class ShowActivity extends AppCompatActivity {
         gridView.setAdapter(simpleAdapter);
     }
 
-    private List<Map<String,Object>> getData() {
-        for (int i = 0; i < getModel().getmData().size();i++){
+    public static void setData(Bitmap bitmap, String date) {
             Map<String,Object> map = new HashMap<String,Object>();
-            map.put("img",getModel().getmData().get(i).getBitmap());
-            map.put("txt",getModel().getmData().get(i).getDate());
+            map.put("img",bitmap);
+            map.put("txt",date);
             data.add(map);
+    }
+
+    public static void clearData(){
+        data.clear();
+    }
+
+    public static void displayData(){
+        for(int i = 0; i < data.size(); i++){
+            System.out.println(data.get(i).toString());
         }
-        return data;
     }
 }

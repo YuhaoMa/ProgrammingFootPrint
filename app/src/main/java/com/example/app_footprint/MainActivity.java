@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         sees = (TextView) findViewById((R.id.textView3));
         requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(Json.getUserData());
-        requestQueue.add(Json.showPhoto());
 
     }
 
@@ -68,12 +67,14 @@ public class MainActivity extends AppCompatActivity {
         }
         String user = email.getText().toString();
         String password = passwd.getText().toString();
+        int id = 0;
         for (ArrayList<String> userData : UserData) {
             if (user.equals(userData.get(0))) {
                 if (password.equals(userData.get(1))) {
                     MainActivity.setCheck(true);
                     setUsername(userData.get(2));
                     setEmail(userData.get(0));
+                    id = Integer.valueOf(userData.get(4));
                 } else {
                     System.out.println("Password is incorrect!!!!!!!!!!!!!!!!");
                 }
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         if (check) {
             setCheck(false);
             Intent intent = new Intent(this,MapsActivity.class);
-           requestQueue.add(Json.LoginSuccessfully(user,username,intent,this));
+           requestQueue.add(Json.LoginSuccessfully(user,username,intent,this,String.valueOf(id)));
 
         }
 

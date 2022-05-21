@@ -99,10 +99,12 @@ public class RegisterActivity extends AppCompatActivity {
                 JsonArrayRequest submitRequest = Json.newUser(textPassword,textEmail,
                         textName,errorMessage);
                  requestQueue.add(submitRequest);
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+
             }
         }
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+
     }
 
 }

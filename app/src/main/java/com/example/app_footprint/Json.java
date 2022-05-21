@@ -1,12 +1,23 @@
 package com.example.app_footprint;
 
+import static com.example.app_footprint.MapsActivity.currentLatitude;
+import static com.example.app_footprint.MapsActivity.currentLongitude;
 import static com.example.app_footprint.MapsActivity.getmMap;
+import static com.example.app_footprint.MapsActivity.group;
+import static com.example.app_footprint.MapsActivity.positionId;
+import static com.example.app_footprint.ShowActivity.clearData;
+import static com.example.app_footprint.ShowActivity.setData;
 
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,7 +36,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
-import com.example.app_footprint.module.LoginViewModel;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -34,9 +44,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Json extends AppCompatActivity {
@@ -59,6 +70,7 @@ public class Json extends AppCompatActivity {
                                user.add(curObject.getString("Password").toString());
                                user.add(curObject.getString("Name").toString());
                                user.add(curObject.getString("HeadPhoto").toString());
+                               user.add(curObject.getString("idUsers").toString());
                                UserData.add(user);
                            }
 
@@ -83,7 +95,7 @@ public class Json extends AppCompatActivity {
 
     }
 
-    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent, Activity activity)
+    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent, Activity activity,String id)
     {
         ArrayList<String> Userdata = new ArrayList<>();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "getGroup/"+address, null,
@@ -96,7 +108,8 @@ public class Json extends AppCompatActivity {
                             for(int i=0;i<response.length();i++)
                             {
                                 JSONObject curObject = response.getJSONObject( i );
-
+                                group.put(curObject.getString("GroupName").toString(),
+                                        curObject.getString("idGroup").toString());
                                 Userdata.add(curObject.getString("GroupName").toString());
                                 //System.out.println("!!!!!object+"+Userdata);
                             }
@@ -104,6 +117,7 @@ public class Json extends AppCompatActivity {
                             intent.putExtra("address",address);
                             System.out.println("Userdata!!!!!!!!!"+Userdata);
                             intent.putExtra("GroupInfo",Userdata);
+                            intent.putExtra("id",id);
                             activity.startActivity(intent);
                         }
                         catch( JSONException e )
@@ -127,7 +141,7 @@ public class Json extends AppCompatActivity {
 
     }
     public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder, Activity activity,String address,
-    String userName,Intent intent)
+    String userName,Intent intent, String id)
     {
         ArrayList<String> codes = new ArrayList<String>();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "searchGroupCode", null,
@@ -183,7 +197,7 @@ public class Json extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                                     RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                                    JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address,code.getText().toString(),intent,activity,userName);
+                                    JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address,code.getText().toString(),intent,activity,userName,id);
                                     requestQueue.add(jsonArrayRequest1);
                             }
                         });
@@ -204,7 +218,7 @@ public class Json extends AppCompatActivity {
 
 
     }
-    public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent,Activity activity ,String userName)
+    public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent,Activity activity ,String userName, String id)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"addGroup/"+address+"/"+code
                 , null,
@@ -214,7 +228,7 @@ public class Json extends AppCompatActivity {
                     public void onResponse(JSONArray response)
                     {
                         RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                        JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(address,userName,intent,activity);
+                        JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(address,userName,intent,activity,id);
                         requestQueue.add(jsonArrayRequest1);
                     }
                 },
@@ -252,7 +266,7 @@ public class Json extends AppCompatActivity {
 
     public static JsonArrayRequest createNewGroup(EditText groupName,String address,String userName,
                                                   Activity activity,Intent intent,
-                                                  AlertDialog.Builder builder )
+                                                  AlertDialog.Builder builder,String id )
     {
         GenerateCode generateCode = new GenerateCode(3);
         String Sendcode = generateCode.generateCode();
@@ -300,7 +314,7 @@ public class Json extends AppCompatActivity {
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                             JsonArrayRequest jsonArrayRequest1 = Json.setGroupName(Sendcode,groupName.getText().toString(),
-                                    address,intent,activity,userName);
+                                    address,intent,activity,userName,id);
                             requestQueue.add(jsonArrayRequest1);
                         }
                     });
@@ -322,7 +336,7 @@ public class Json extends AppCompatActivity {
     }
 
     public static JsonArrayRequest setGroupName(String code,String GroupName,String address,Intent intent
-    ,Activity activity,String userName)
+    ,Activity activity,String userName,String id)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"setGroupName/"+GroupName+"/"+code,
@@ -345,12 +359,13 @@ public class Json extends AppCompatActivity {
                 }
         );
         RequestQueue requestQueue = Volley.newRequestQueue(activity);
-        JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address,code,intent,activity,userName);
+        JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address,code,intent,activity,userName,id);
         requestQueue.add(jsonArrayRequest1);
         return submitRequest;
     }
 
-    public static JsonArrayRequest getMyPosition(String user){
+    public static JsonArrayRequest getMyPosition(String user)
+    {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"getMyPosition/"+user
                 , null,
@@ -370,9 +385,14 @@ public class Json extends AppCompatActivity {
                                         Double.parseDouble(curObject.getString("latitude")),
                                         Double.parseDouble(curObject.getString("longitude")));
                                 Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
-                                        .title(curObject.getString("date")));
-                                        //.snippet(model.findByUserId("9","2").get(0).getGroupId()));
-                                marker.setTag(i);
+                                        .title(curObject.getString("date"))
+                                        .snippet(curObject.getString("userId")));
+                                marker.setTag(curObject.getString("idPositions"));
+                                if(i==response.length()-1){
+                                    positionId = curObject.getString("idPositions");
+                                    currentLatitude = Double.parseDouble(curObject.getString("latitude"));
+                                    currentLongitude = Double.parseDouble(curObject.getString("longitude"));
+                                }
                             }
                         }
                         catch( JSONException e )
@@ -427,9 +447,10 @@ public class Json extends AppCompatActivity {
                                 latLng = new LatLng(
                                         Double.parseDouble(curObject.getString("latitude")),
                                         Double.parseDouble(curObject.getString("longitude")));
-                                getmMap().addMarker(new MarkerOptions().position(latLng)
+                                Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
                                         .snippet(curObject.getString("userId")));
+                                marker.setTag(curObject.getString("idPositions"));
                             }
                         }
                         catch( JSONException e )
@@ -450,12 +471,23 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
     }
 
-    public static JsonArrayRequest addPhotoInfo(String date, String pId
-            , String uId, String gId)
+    public static JsonArrayRequest addPhotoInfo(String date, String uId
+            , String gId, String pId,ProgressDialog progressDialog, Activity activity
+            , String imageString)
     {
+
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url + "addPhotoInfo/" + date + "/" + pId + "/" + date + "/" + uId + "/" + gId
-                , null, null,
+                url + "addPhotoInfo/" + date + "/" + uId + "/" + gId + "/" + pId
+                , null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        System.out.println("ADD photo info########");
+                        RequestQueue requestQueue = Volley.newRequestQueue(activity);
+                        StringRequest submitRequest = Json.addPhoto(progressDialog,activity,imageString);
+                        requestQueue.add(submitRequest);
+                    }
+                },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -468,12 +500,14 @@ public class Json extends AppCompatActivity {
 
     public static StringRequest addPhoto(ProgressDialog progressDialog,Activity activity
             ,String imageString){
+        System.out.println(imageString);
         StringRequest submitRequest = new StringRequest (Request.Method.POST
                 , url+"addPhoto"
                 ,  new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 //Turn the progress widget off
+                System.out.println("ADD photo %%%%%%%%%");
                 progressDialog.dismiss();
                 Toast.makeText(activity, "Post request executed", Toast.LENGTH_SHORT).show();
             }
@@ -493,47 +527,106 @@ public class Json extends AppCompatActivity {
         return submitRequest;
     }
 
-    public static JsonArrayRequest showPhoto(){
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"show", null,
-                new Response.Listener<JSONArray>()
-                {
-                    @Override
-                    public void onResponse(JSONArray response)
-                    {
-                        try
-                        {
-                            JSONObject curObject = new JSONObject();
-                            for(int i = 0; i < response.length();i++){
-                                curObject = response.getJSONObject(i);
-                                Position position = new Position
-                                        (curObject.getString("PhotoBase"),curObject.getString("date")
-                                        ,curObject.getString("userId"),curObject.getString("groupId"),
-                                                curObject.getString("positionId"));
-                                model.getmData().add(position);
-                            }
-                            //System.out.println(model.getmData().get(0).getPhotoBase());
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        error.getLocalizedMessage();
-                    }
-                }
-        );
-        return jsonArrayRequest;
-
-    }
-
     public static Model getModel() {
         return model;
+    }
+
+    public static JsonArrayRequest getPhoto(String uid, String gid, String pid,Intent intent
+            , Activity activity)
+    {
+        List<Map<String,Object>> data = new ArrayList<Map<String, Object>>();;
+        JsonArrayRequest jsonArrayRequest;
+        System.out.println(uid);
+        System.out.println(gid);
+        System.out.println(pid);
+        clearData();
+        if(gid==null){
+            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                    url+"getMyPhoto/"+uid+"/"+pid
+                    , null,
+                    new Response.Listener<JSONArray>()
+                    {
+                        @Override
+                        public void onResponse(JSONArray response)
+                        {
+                            System.out.println("getmyphoto!!!!!!!!!");
+                            try
+                            {
+                                JSONObject curObject = new JSONObject();
+                                String photoBase;
+                                Bitmap bitmap;
+                                for(int i = 0; i < response.length();i++){
+                                    curObject = response.getJSONObject(i);
+                                    photoBase = curObject.getString("PhotoBase");
+                                    byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
+                                    bitmap = BitmapFactory.decodeByteArray( imageBytes
+                                            , 0, imageBytes.length );
+                                    setData(bitmap,curObject.getString("date"));
+                                }
+                                //intent.putExtra("data", (Serializable) data);
+                                activity.startActivity(intent);
+                            }
+                            catch( JSONException e )
+                            {
+                                Log.e( "Database", e.getMessage(), e );
+                            }
+                        }
+                    },
+                    new Response.ErrorListener()
+                    {
+                        @Override
+                        public void onErrorResponse(VolleyError error)
+                        {
+                            error.getLocalizedMessage();
+                        }
+                    }
+            );
+        }
+        else{
+            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                    url+"getGroupPhotos/"+uid+"/"+gid+"/"+pid
+                    , null,
+                    new Response.Listener<JSONArray>()
+                    {
+                        @Override
+                        public void onResponse(JSONArray response)
+                        {
+                            System.out.println("getmyphoto!!!!!!!!!");
+                            try
+                            {
+                                JSONObject curObject = new JSONObject();
+                                String photoBase;
+                                Bitmap bitmap;
+                                for(int i = 0; i < response.length();i++){
+                                    curObject = response.getJSONObject(i);
+                                    photoBase = curObject.getString("PhotoBase");
+                                    byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
+                                    bitmap = BitmapFactory.decodeByteArray( imageBytes
+                                            , 0, imageBytes.length );
+                                    setData(bitmap,curObject.getString("date"));
+                                }
+                                activity.startActivity(intent);
+                            }
+                            catch( JSONException e )
+                            {
+                                Log.e( "Database", e.getMessage(), e );
+                            }
+                        }
+                    },
+                    new Response.ErrorListener()
+                    {
+                        @Override
+                        public void onErrorResponse(VolleyError error)
+                        {
+                            error.getLocalizedMessage();
+                        }
+                    }
+            );
+
+        }
+        Bundle bundle = new Bundle();
+
+
+        return jsonArrayRequest;
     }
 }

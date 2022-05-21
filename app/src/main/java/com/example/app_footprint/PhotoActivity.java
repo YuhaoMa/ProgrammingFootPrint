@@ -39,12 +39,18 @@ public class PhotoActivity extends AppCompatActivity {
     private int PICK_IMAGE_REQUEST = 111;
     private Bitmap bitmap;
     private ProgressDialog progressDialog;
+    private Bundle extras;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
+        extras = getIntent().getExtras();
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
+        System.out.println((String) extras.get("date"));
+        System.out.println((String) extras.get("positionId"));
+        System.out.println((String) extras.get("id"));
+        System.out.println((String) extras.get("groupId"));
     }
     public void onBtnPickClicked(View caller)
     {
@@ -66,7 +72,6 @@ public class PhotoActivity extends AppCompatActivity {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 //Rescale the bitmap to 400px wide (avoid storing large images!)
                 bitmap = getResizedBitmap( bitmap, 400 );
-
                 //Setting image to ImageView
                 image.setImageBitmap(bitmap);
             } catch (Exception e) {
@@ -78,19 +83,27 @@ public class PhotoActivity extends AppCompatActivity {
     public void onBtnPostClicked(View caller)
     {
         //Start an animating progress widget
-        progressDialog = new ProgressDialog(PhotoActivity.this);
-        progressDialog.setMessage("Uploading, please wait...");
-        progressDialog.show();
+        if((String)extras.get("groupId") == null){
+            Toast.makeText(this, "You are not in a group.", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        else {
+            progressDialog = new ProgressDialog(PhotoActivity.this);
+            progressDialog.setMessage("Uploading, please wait...");
+            progressDialog.show();
 
-        //convert image to base64 string
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageBytes = baos.toByteArray();
-        final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+            //convert image to base64 string
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] imageBytes = baos.toByteArray();
+            final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
 
-        requestQueue.add(Json.addPhotoInfo("2022-05-14","1","1","1"));
-        requestQueue.add(Json.addPhoto(progressDialog,this,imageString));
-        finish();
+            requestQueue.add(Json.addPhotoInfo((String) extras.get("date"),(String) extras.get("id")
+                    ,(String) extras.get("groupId"),(String) extras.get("positionId"), progressDialog
+                    ,this,imageString));
+
+            finish();
+        }
     }
 
 
