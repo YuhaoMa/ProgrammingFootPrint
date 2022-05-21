@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    private Button btnLogin;
-    private Button btnRegister;
+    //private Button btnLogin;
+    //private Button btnRegister;
     private EditText email;
     private TextView passwd;
     private RequestQueue requestQueue;
@@ -49,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        btnLogin = (Button) findViewById(R.id.btn_login);
-        btnRegister = (Button) findViewById(R.id.btn_register);
+        //btnLogin = (Button) findViewById(R.id.btn_login);
+        //btnRegister = (Button) findViewById(R.id.btn_register);
         email = findViewById(R.id.txtName);
         passwd = (TextView) findViewById(R.id.editTextTextPassword);
         sees = (TextView) findViewById((R.id.textView3));
@@ -60,11 +60,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnLogin_Clicker(View caller) {
-        System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+UserData);
+        //System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+UserData);
         requestQueue = Volley.newRequestQueue(this);
-        for (ArrayList<String> userData : UserData) {
-            System.out.println(UserData);
-        }
+        //for (ArrayList<String> userData : UserData) {
+        //    System.out.println(UserData);
+        //}
         String user = email.getText().toString();
         String password = passwd.getText().toString();
         int id = 0;

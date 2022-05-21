@@ -72,14 +72,14 @@ public class MapsActivity extends AppCompatActivity implements
     private Toolbar tToolbar;
     private Toolbar bToolbar;
     private LatLng latLng;
-    private ImageButton homeBtn;
-    private ImageButton searchBtn;
-    private  ImageButton newBtn;
+    //private ImageButton homeBtn;
+    //private ImageButton searchBtn;
+    //private  ImageButton newBtn;
     private ArrayList<String> groups;
-    private String address;
+    //private String address;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
-    private Bitmap bitmap;
+    //private Bitmap bitmap;
     private String date;
     private String id;
     public static String finalGroupName;
@@ -96,7 +96,7 @@ public class MapsActivity extends AppCompatActivity implements
         requestQueue = Volley.newRequestQueue(this);
         //requestQueue.add(Json.showPhoto());
         Bundle extras = getIntent().getExtras();
-        System.out.println(extras.get("address")+"！！！！！！！！！！！！！！！address");
+        //System.out.println(extras.get("address")+"！！！！！！！！！！！！！！！address");
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         tToolbar.setTitle((String) extras.get("username"));
         setSupportActionBar(tToolbar);
@@ -129,9 +129,9 @@ public class MapsActivity extends AppCompatActivity implements
 
         });
         bToolbar = (Toolbar) findViewById(R.id.toolbar3);
-        homeBtn =(ImageButton) findViewById(R.id.HomeBtn);
-        searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
-        newBtn = (ImageButton) findViewById(R.id.AddBtn);
+        //homeBtn =(ImageButton) findViewById(R.id.HomeBtn);
+        //searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
+        //newBtn = (ImageButton) findViewById(R.id.AddBtn);
         groups =(ArrayList<String>) extras.get("GroupInfo");
         userAddress = (String) extras.get("address");
         id = (String) extras.get("id");
@@ -170,8 +170,7 @@ public class MapsActivity extends AppCompatActivity implements
                     latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
                             String.valueOf(location.getLongitude()),date
-                            ,"label","user"));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                            ,"label",id));
                 }
                 else{}
             }

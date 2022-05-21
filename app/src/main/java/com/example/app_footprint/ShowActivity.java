@@ -1,6 +1,6 @@
 package com.example.app_footprint;
 
-import static com.example.app_footprint.Json.getModel;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
@@ -64,5 +65,9 @@ public class ShowActivity extends AppCompatActivity {
         for(int i = 0; i < data.size(); i++){
             System.out.println(data.get(i).toString());
         }
+    }
+
+    public void onClick_close(View caller){
+        finish();
     }
 }
