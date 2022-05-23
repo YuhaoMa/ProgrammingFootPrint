@@ -1,9 +1,11 @@
 package com.example.app_footprint;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -22,6 +24,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.app_footprint.Email.GenerateCode;
+import com.example.app_footprint.Email.SendMailUtil;
 import com.example.app_footprint.module.LoginViewModel;
 import com.example.app_footprint.presenter.ViewModeNoti;
 
@@ -96,6 +100,65 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void forgetBtn_Clicker(View view){
+        GenerateCode generateCode = new GenerateCode(8);
+         String Sendcode = generateCode.generateCode();
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setMessage("Enter your User emailaddress");
+        EditText textEmail = new EditText(this);
+        builder.setView(textEmail);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String emailaddress = textEmail.getText().toString();
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+                boolean check = false;
+                for (ArrayList<String> userData : UserData) {
+                    if (emailaddress.equals(userData.get(0))) {
+                        SendMailUtil.send(textEmail.getText().toString(), Sendcode, 3, null);
+                        check = true;
+                    }
+                }
+                if(check)
+                {
+                    builder1.setMessage("Enter the Verification Code ");
+                    EditText textCode = new EditText(MainActivity.this);
+                    builder1.setView(textCode);
+                    builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
+                            builder2.setMessage("Enter the new Password ");
+                            EditText textPassword = new EditText(MainActivity.this);
+                            builder2.setView(textPassword);
+                            builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    AlertDialog.Builder builder3 = new AlertDialog.Builder(MainActivity.this);
+                                    builder3.setMessage("Set Successfully ");
+                                    builder3.setPositiveButton("OK", null);
+                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                                    requestQueue.add(Json.changePassword(textPassword.getText().toString(),textEmail.getText().toString(),
+                                    intent,builder3,MainActivity.this));
+                                }
+                            });
+                            AlertDialog dialog2 = builder2.create();
+                            dialog2.show();
+                        }
+                    });
+                }
+               else
+                {
+                    builder1.setMessage("User doesn't exist!");
+                    builder1.setPositiveButton("Close",null);
+                }
+                AlertDialog dialog1 = builder1.create();
+                dialog1.show();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
     public static void setCheck(boolean x) {
         check = x;
     }

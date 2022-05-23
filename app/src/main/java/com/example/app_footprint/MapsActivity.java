@@ -88,6 +88,8 @@ public class MapsActivity extends AppCompatActivity implements
     public static String positionId;
     public static double currentLatitude;
     public static double currentLongitude;
+    private Bitmap bitmap;
+    private TextView UserNametext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,13 +98,14 @@ public class MapsActivity extends AppCompatActivity implements
         requestQueue = Volley.newRequestQueue(this);
         //requestQueue.add(Json.showPhoto());
         Bundle extras = getIntent().getExtras();
-        //System.out.println(extras.get("address")+"！！！！！！！！！！！！！！！address");
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
-        tToolbar.setTitle((String) extras.get("username"));
+        UserNametext = findViewById(R.id.textView9);
+        UserNametext.setText((String) extras.get("username"));
         setSupportActionBar(tToolbar);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
         Calendar cal = Calendar.getInstance();
         date = dateFormat.format(cal.getTime());
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         Intent intent = new Intent(this,PhotoActivity.class);
         tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
 

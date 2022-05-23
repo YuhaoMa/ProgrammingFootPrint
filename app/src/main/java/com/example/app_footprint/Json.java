@@ -53,6 +53,7 @@ import java.util.Map;
 
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
+    private static Model model = new Model();
     public static JsonArrayRequest getUserData()
     {
         ArrayList<ArrayList<String>> UserData = new ArrayList<>();
@@ -274,9 +275,17 @@ public class Json extends AppCompatActivity {
         String Sendcode = generateCode.generateCode();
         //System.out.println("Genearate a new Groupcode:::: "+Sendcode);
         //System.out.println("Create a new Group name is :::: "+groupName.getText().toString());
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
-                , url+"createGroup/"+Sendcode+"/"+ groupName.getText().toString()
-                , null, null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"createGroup/"+Sendcode+"/"+
+                groupName.getText().toString()
+                , null,
+                new Response.Listener<JSONArray>()
+                {
+                    @Override
+                    public void onResponse(JSONArray response)
+                    {
+
+                    }
+                },
                 new Response.ErrorListener()
                 {
                     @Override
@@ -293,6 +302,7 @@ public class Json extends AppCompatActivity {
                 AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
                 builder1.setTitle("Reminder");
                 RequestQueue requestQueue = Volley.newRequestQueue(activity);
+                System.out.println("GroupName:::::"+groupName.getText().toString());
                 if(groupName.getText().toString()!= null)
                 {
                     builder1.setMessage("The group \""+groupName.getText().toString()
@@ -600,5 +610,37 @@ public class Json extends AppCompatActivity {
 
         }
         return jsonArrayRequest;
+
+    }
+
+    public static JsonArrayRequest changePassword(String password, String emailaddress, Intent intent, AlertDialog.Builder builder, Activity activity)
+    {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                url+"changePassword/"+password+"/"+emailaddress, null,
+                new Response.Listener<JSONArray>()
+                {
+                    @Override
+                    public void onResponse(JSONArray response)
+                    {
+
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        error.getLocalizedMessage();
+                    }
+                }
+        );
+        AlertDialog dialog3 = builder.create();
+        dialog3.show();
+        activity.startActivity(intent);
+        return jsonArrayRequest;
+
+    }
+    public static Model getModel() {
+        return model;
     }
 }

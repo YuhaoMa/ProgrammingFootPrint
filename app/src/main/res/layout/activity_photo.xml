@@ -11,41 +11,41 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:drawableRight="@android:drawable/ic_menu_gallery"
         android:onClick="onBtnPickClicked"
-        android:text="Choose From Gallery"
-        app:layout_constraintTop_toBottomOf="@+id/img_choose" />
+        android:text="Pick"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/img_choose"
-        android:layout_width="400px"
-        android:layout_height="400px"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/default_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/record_back"
+        app:layout_constraintTop_toBottomOf="@+id/button"
         tools:srcCompat="@tools:sample/avatars" />
 
     <ImageView
         android:id="@+id/record_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:onClick="onClick_close"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+        app:layout_constraintTop_toBottomOf="@+id/img_choose"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+        tools:layout_editor_absoluteX="49dp" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="172dp"
+        android:layout_marginStart="208dp"
+        android:drawableLeft="@android:drawable/checkbox_on_background"
         android:onClick="onBtnPostClicked"
-        android:text="Upload"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.821"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/button" />
+        android:text="Post"
+        app:layout_constraintStart_toEndOf="@+id/button"
+        tools:layout_editor_absoluteY="0dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
