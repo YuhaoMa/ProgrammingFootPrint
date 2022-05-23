@@ -76,7 +76,7 @@ public class MapsActivity extends AppCompatActivity implements
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
     private Bitmap bitmap;
-
+    private TextView UserNametext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,9 +86,10 @@ public class MapsActivity extends AppCompatActivity implements
         //requestQueue.add(Json.showPhoto());
         Bundle extras = getIntent().getExtras();
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
-        tToolbar.setTitle((String) extras.get("username"));
+        UserNametext = findViewById(R.id.textView9);
+        UserNametext.setText((String) extras.get("username"));
         setSupportActionBar(tToolbar);
-
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         Intent intent = new Intent(this,PhotoActivity.class);
         tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
 
