@@ -58,50 +58,96 @@ import java.util.Set;
 
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
-    private static Model model = new Model();
-    public static JsonArrayRequest getUserData()
+    public static JsonArrayRequest getUserInfo(String email,String password,TextView textView
+            ,Intent intent,Activity activity)
     {
-        ArrayList<ArrayList<String>> UserData = new ArrayList<>();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "UserData", null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + email,
+                null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        try
-                        {
-                           for(int i=0;i<response.length();i++)
-                           {
-                               JSONObject curObject = response.getJSONObject( i );
-                               ArrayList<String> user = new ArrayList<>();
-                               user.add(curObject.getString("emailaddress").toString());
-                               user.add(curObject.getString("Password").toString());
-                               user.add(curObject.getString("Name").toString());
-                               user.add(curObject.getString("HeadPhoto").toString());
-                               user.add(curObject.getString("idUsers").toString());
-                               UserData.add(user);
-                           }
-
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
+                        try {
+                            if (!response.getJSONObject(0).getString("Password").equals(password)) {
+                                textView.setText("Incorrect Password");
+                            }
+                            else{
+                                Toast.makeText(activity, "Login Successfully", Toast.LENGTH_SHORT).show();
+                                String userName = response.getJSONObject(0).getString("Name");
+                                RequestQueue requestQueue = Volley.newRequestQueue(activity);
+                                JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(email,userName
+                                        ,intent,activity,response.getJSONObject(0).getString("idUsers"));
+                                requestQueue.add(jsonArrayRequest1);
+                            }
+                        } catch (JSONException e) {
+                            textView.setText("Invalid User, Please Sing Up");
                         }
                     }
                 },
-                new Response.ErrorListener()
-                {
+                new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        //System.out.println("Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
                     }
-                }
-        );
-         MainActivity.setUserData(UserData);
+                });
         return jsonArrayRequest;
-
     }
 
+    public static JsonArrayRequest forgetMyPassword(String address, AlertDialog.Builder builder,
+                                                    Activity activity){
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + address,
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try{
+                            if(address.equals(response.getJSONObject(0).getString("emailaddress"))){
+                                GenerateCode generateCode = new GenerateCode(8);
+                                String Sendcode = generateCode.generateCode();
+                                SendMailUtil.send(address, Sendcode, 3, null);
+                                builder.setMessage("Enter the Verification Code ");
+                                EditText textCode = new EditText(activity);
+                                builder.setView(textCode);
+                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
+                                        builder2.setMessage("Enter the new Password ");
+                                        EditText textPassword = new EditText(activity);
+                                        builder2.setView(textPassword);
+                                        builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                AlertDialog.Builder builder3 = new AlertDialog.Builder(activity);
+                                                builder3.setMessage("Set Successfully ");
+                                                builder3.setPositiveButton("OK", null);
+                                                Intent intent = new Intent(activity, MainActivity.class);
+                                                RequestQueue requestQueue = Volley.newRequestQueue(activity);
+                                                requestQueue.add(Json.changePassword(textPassword.getText().toString(),address,
+                                                        intent,builder3,activity));
+                                            }
+                                        });
+                                        AlertDialog dialog2 = builder2.create();
+                                        dialog2.show();
+                                    }
+                                });
+                                AlertDialog dialog1 = builder.create();
+                                dialog1.show();
+                            }
+                        }
+                        catch (JSONException e){
+                            builder.setMessage("User doesn't exist!");
+                            builder.setPositiveButton("Close",null);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+        return jsonArrayRequest;
+    }
     public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent
             , Activity activity,String userId)
     {
@@ -253,7 +299,6 @@ public class Json extends AppCompatActivity {
         );
         return jsonArrayRequest;
     }
-
 
     public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName
             ,TextView errorMessage)
@@ -644,8 +689,5 @@ public class Json extends AppCompatActivity {
         activity.startActivity(intent);
         return jsonArrayRequest;
 
-    }
-    public static Model getModel() {
-        return model;
     }
 }

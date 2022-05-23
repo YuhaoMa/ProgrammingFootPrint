@@ -219,8 +219,10 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     public void onBtnHome_Clicked(View caller) {
-        Intent intent = new Intent(this,MainActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this,MainActivity.class);
+        //startActivity(intent);
+        mMap.clear();
+        requestQueue.add(Json.getMyPosition(userAddress));
     }
 
     public void searchGroup(View view){
