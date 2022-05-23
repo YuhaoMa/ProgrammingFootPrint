@@ -354,10 +354,10 @@ public class Json extends AppCompatActivity {
         return submitRequest;
     }
 
-    public static JsonArrayRequest getMyPosition(String user)
+    public static JsonArrayRequest getMyPosition(String useraddress)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"getMyPosition/"+user, null,
+                url+"getMyPosition/"+useraddress, null,
                 new Response.Listener<JSONArray>()
                 {
                     @Override
@@ -370,16 +370,16 @@ public class Json extends AppCompatActivity {
                             for(int i = 0; i < response.length();i++){
                                 curObject = response.getJSONObject(i);
                                 latLng = new LatLng(
-                                        Double.parseDouble(curObject.getString("latitude")),
-                                        Double.parseDouble(curObject.getString("longitude")));
+                                        Double.parseDouble(curObject.getString("Lat")),
+                                        Double.parseDouble(curObject.getString("Lon")));
                                 Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
                                         .snippet(curObject.getString("userId")));
-                                marker.setTag(curObject.getString("idPositions"));
+                                //marker.setTag(curObject.getString("idPhoto"));
+                                marker.setTag(i);
                                 if(i==response.length()-1){
-                                    positionId = curObject.getString("idPositions");
-                                    currentLatitude = Double.parseDouble(curObject.getString("latitude"));
-                                    currentLongitude = Double.parseDouble(curObject.getString("longitude"));
+                                    currentLatitude = Double.parseDouble(curObject.getString("Lat"));
+                                    currentLongitude = Double.parseDouble(curObject.getString("Lon"));
                                 }
                             }
                         }
@@ -401,11 +401,10 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
     }
 
-    public static JsonArrayRequest newPosition(String lat,String log, String date,String label
-            ,String user)
+    public static JsonArrayRequest newPosition(String lat,String log, String date,int user,int group)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url + "newPosition/" + lat + "/" + log + "/" + date + "/" + label + "/" + user
+                url + "newPosition/" + date + "/" + user+ "/" + group + "/" + lat+"/"+log
                 , null,
                 new Response.Listener<JSONArray>() {
             @Override
@@ -413,7 +412,7 @@ public class Json extends AppCompatActivity {
                 LatLng latLng = new LatLng(Double.parseDouble(lat),Double.parseDouble(log));
                 Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
                         .title(date)
-                        .snippet(user));
+                        .snippet(Integer.toString(user)));
                 marker.setTag(String.valueOf(Integer.getInteger(positionId))+1);
             }
         },
@@ -443,8 +442,8 @@ public class Json extends AppCompatActivity {
                             for(int i = 0; i < response.length();i++){
                                 curObject = response.getJSONObject(i);
                                 latLng = new LatLng(
-                                        Double.parseDouble(curObject.getString("latitude")),
-                                        Double.parseDouble(curObject.getString("longitude")));
+                                        Double.parseDouble(curObject.getString("Lat")),
+                                        Double.parseDouble(curObject.getString("Lon")));
                                 Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
                                         .snippet(curObject.getString("userId")));
