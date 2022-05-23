@@ -96,10 +96,12 @@ public class Json extends AppCompatActivity {
 
     }
 
-    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent, Activity activity,String id)
+    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent
+            , Activity activity,String id)
     {
         ArrayList<String> Userdata = new ArrayList<>();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "getGroup/"+address, null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url+ "getGroup/"+address, null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
@@ -136,13 +138,11 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-        // System.out.println("find!!!!!!!!!!!!!!!!!!!!!!!!!!!"+Userdata);
-
         return jsonArrayRequest;
 
     }
-    public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder, Activity activity,String address,
-    String userName,Intent intent, String id)
+    public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder
+            ,Activity activity,String address, String userName,Intent intent, String id)
     {
         ArrayList<String> codes = new ArrayList<String>();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "searchGroupCode", null,
@@ -179,7 +179,7 @@ public class Json extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                System.out.println("你输入的是: " + code.getText().toString());
+                //System.out.println("你输入的是: " + code.getText().toString());
                 AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
                 builder1.setTitle("Reminder");
                 boolean check = false;
@@ -197,9 +197,9 @@ public class Json extends AppCompatActivity {
                         builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-
                                     RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                                    JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address,code.getText().toString(),intent,activity,userName,id);
+                                    JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address
+                                            ,code.getText().toString(),intent,activity,userName,id);
                                     requestQueue.add(jsonArrayRequest1);
                             }
                         });
@@ -220,17 +220,19 @@ public class Json extends AppCompatActivity {
 
 
     }
-    public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent,Activity activity ,String userName, String id)
+    public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent
+            ,Activity activity ,String userName, String id)
     {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"addGroup/"+address+"/"+code
-                , null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url+"addGroup/"+address+"/"+code, null,
                 new Response.Listener<JSONArray>()
                 {
                     @Override
                     public void onResponse(JSONArray response)
                     {
                         RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                        JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(address,userName,intent,activity,id);
+                        JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(address,userName
+                                ,intent,activity,id);
                         requestQueue.add(jsonArrayRequest1);
                     }
                 },
@@ -247,7 +249,8 @@ public class Json extends AppCompatActivity {
     }
 
 
-    public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName,TextView errorMessage)
+    public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName
+            ,TextView errorMessage)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"newUser/"+textPassword+"/"+textEmail+"/"+textName,
@@ -292,8 +295,8 @@ public class Json extends AppCompatActivity {
                 RequestQueue requestQueue = Volley.newRequestQueue(activity);
                 if(groupName.getText().toString()!= null)
                 {
-                    builder1.setMessage("The group \""+groupName.getText().toString()+"\" was created successfully!\n" +
-                            "Invitation code :"+Sendcode);
+                    builder1.setMessage("The group \""+groupName.getText().toString()
+                            +"\" was created successfully!\n" + "Invitation code :"+Sendcode);
                     SendMailUtil.send(address,Sendcode,2,groupName.getText().toString());
                     builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
@@ -344,8 +347,7 @@ public class Json extends AppCompatActivity {
     public static JsonArrayRequest getMyPosition(String user)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"getMyPosition/"+user
-                , null,
+                url+"getMyPosition/"+user, null,
                 new Response.Listener<JSONArray>()
                 {
                     @Override
@@ -390,10 +392,12 @@ public class Json extends AppCompatActivity {
     }
 
     public static JsonArrayRequest newPosition(String lat,String log, String date,String label
-            ,String user) {
+            ,String user)
+    {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                 url + "newPosition/" + lat + "/" + log + "/" + date + "/" + label + "/" + user
-                , null, new Response.Listener<JSONArray>() {
+                , null,
+                new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 LatLng latLng = new LatLng(Double.parseDouble(lat),Double.parseDouble(log));
@@ -401,7 +405,6 @@ public class Json extends AppCompatActivity {
                         .title(date)
                         .snippet(user));
                 marker.setTag(String.valueOf(Integer.getInteger(positionId))+1);
-
             }
         },
                 new Response.ErrorListener() {
@@ -423,7 +426,6 @@ public class Json extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response)
                     {
-                        //System.out.println("Response!!!!!!!!!");
                         try
                         {
                             JSONObject curObject;
@@ -597,7 +599,6 @@ public class Json extends AppCompatActivity {
             );
 
         }
-        Bundle bundle = new Bundle();
         return jsonArrayRequest;
     }
 }

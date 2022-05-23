@@ -169,8 +169,7 @@ public class MapsActivity extends AppCompatActivity implements
                 {
                     latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
-                            String.valueOf(location.getLongitude()),date
-                            ,"label",id));
+                            String.valueOf(location.getLongitude()),date,"label",id));
                 }
                 else{}
             }
