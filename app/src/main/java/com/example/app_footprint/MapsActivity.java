@@ -167,14 +167,16 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 uploadLocation = location;
-                if(Math.abs(currentLatitude - location.getLatitude()) > 0.05 &&
+                /*if(Math.abs(currentLatitude - location.getLatitude()) > 0.05 &&
                 Math.abs(currentLongitude - location.getLongitude()) > 0.05)
                 {
                     latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
                             String.valueOf(location.getLongitude()),date,"label",id));
                 }
-                else{}
+                else{}*/
+
+
             }
 
             @Override
@@ -211,8 +213,10 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     public void onBtnHome_Clicked(View caller) {
-        Intent intent = new Intent(this,MainActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this,MainActivity.class);
+        //startActivity(intent);
+        mMap.clear();
+        requestQueue.add(Json.getMyPosition(userAddress));
     }
 
     public void searchGroup(View view){
@@ -223,7 +227,8 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setView(code);
         Intent intent = new Intent(this,MapsActivity.class);
         //requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,tToolbar.getTitle().toString(),intent,id));
+        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress
+                ,tToolbar.getTitle().toString(),intent,id));
 
     }
     public void createGroup(View view)
@@ -234,7 +239,6 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setMessage("Enter the name of the group");
         builder.setView(groupName);
         Intent intent = new Intent(this,MapsActivity.class);
-        //requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(Json.createNewGroup(groupName,userAddress,tToolbar.getTitle().toString(),
                 this,intent,builder,id));
     }

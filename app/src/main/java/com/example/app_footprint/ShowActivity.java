@@ -67,7 +67,7 @@ public class ShowActivity extends AppCompatActivity {
         }
     }
 
-    public void onClick_close(View caller){
+    public void onClick_return(View caller){
         finish();
     }
 }

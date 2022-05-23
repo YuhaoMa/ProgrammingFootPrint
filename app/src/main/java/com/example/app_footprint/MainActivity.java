@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    //private Button btnLogin;
-    //private Button btnRegister;
     private EditText email;
     private TextView passwd;
     private RequestQueue requestQueue;
@@ -48,30 +46,21 @@ public class MainActivity extends AppCompatActivity {
     private static boolean check = false;
     private  String username;
     private  String address;
-   private static ArrayList<String> GroupInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //btnLogin = (Button) findViewById(R.id.btn_login);
-        //btnRegister = (Button) findViewById(R.id.btn_register);
         email = findViewById(R.id.txtName);
         passwd = (TextView) findViewById(R.id.editTextTextPassword);
-        sees = (TextView) findViewById((R.id.textView3));
+        sees = (TextView) findViewById((R.id.error_message));
         requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.getUserData());
-
     }
 
     public void onBtnLogin_Clicker(View caller) {
-        //System.out.println("Open the MainActivity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+UserData);
         requestQueue = Volley.newRequestQueue(this);
-        //for (ArrayList<String> userData : UserData) {
-        //    System.out.println(UserData);
-        //}
         String user = email.getText().toString();
         String password = passwd.getText().toString();
-        int id = 0;
+        /*int id = 0;
         for (ArrayList<String> userData : UserData) {
             if (user.equals(userData.get(0))) {
                 if (password.equals(userData.get(1))) {
@@ -80,17 +69,18 @@ public class MainActivity extends AppCompatActivity {
                     setEmail(userData.get(0));
                     id = Integer.valueOf(userData.get(4));
                 } else {
-                    System.out.println("Password is incorrect!!!!!!!!!!!!!!!!");
+                    sees.setText("Password is incorrect");
                 }
             }
         }
         if (check) {
             setCheck(false);
             Intent intent = new Intent(this,MapsActivity.class);
-           requestQueue.add(Json.LoginSuccessfully(user,username,intent,this,String.valueOf(id)));
+            requestQueue.add(Json.LoginSuccessfully(user,username,intent,this,String.valueOf(id)));
 
-        }
-
+        }*/
+        Intent intent = new Intent(this,MapsActivity.class);
+        requestQueue.add(Json.getUserInfo(user,password,sees,intent,this));
     }
 
 
@@ -112,48 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 String emailaddress = textEmail.getText().toString();
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
-                boolean check = false;
-                for (ArrayList<String> userData : UserData) {
-                    if (emailaddress.equals(userData.get(0))) {
-                        SendMailUtil.send(textEmail.getText().toString(), Sendcode, 3, null);
-                        check = true;
-                    }
-                }
-                if(check)
-                {
-                    builder1.setMessage("Enter the Verification Code ");
-                    EditText textCode = new EditText(MainActivity.this);
-                    builder1.setView(textCode);
-                    builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
-                            builder2.setMessage("Enter the new Password ");
-                            EditText textPassword = new EditText(MainActivity.this);
-                            builder2.setView(textPassword);
-                            builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    AlertDialog.Builder builder3 = new AlertDialog.Builder(MainActivity.this);
-                                    builder3.setMessage("Set Successfully ");
-                                    builder3.setPositiveButton("OK", null);
-                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                                    requestQueue.add(Json.changePassword(textPassword.getText().toString(),textEmail.getText().toString(),
-                                    intent,builder3,MainActivity.this));
-                                }
-                            });
-                            AlertDialog dialog2 = builder2.create();
-                            dialog2.show();
-                        }
-                    });
-                }
-               else
-                {
-                    builder1.setMessage("User doesn't exist!");
-                    builder1.setPositiveButton("Close",null);
-                }
-                AlertDialog dialog1 = builder1.create();
-                dialog1.show();
+                requestQueue.add(Json.forgetMyPassword(emailaddress,builder1,MainActivity.this));
             }
         });
         AlertDialog dialog = builder.create();
