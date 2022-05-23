@@ -48,7 +48,6 @@ public class PhotoActivity extends AppCompatActivity {
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
         System.out.println((String) extras.get("date"));
-        System.out.println((String) extras.get("positionId"));
         System.out.println((String) extras.get("id"));
         System.out.println((String) extras.get("groupId"));
     }
@@ -99,7 +98,9 @@ public class PhotoActivity extends AppCompatActivity {
             final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
 
             requestQueue.add(Json.addPhotoInfo((String) extras.get("date"),(String) extras.get("id")
-                    ,(String) extras.get("groupId"),(String) extras.get("positionId"), progressDialog
+                    ,(String) extras.get("groupId"),
+                    (double)extras.get("latitude"),(double)extras.get("longitude")
+                    , progressDialog
                     ,this,imageString));
 
             finish();

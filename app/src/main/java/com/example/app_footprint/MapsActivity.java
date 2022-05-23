@@ -72,20 +72,17 @@ public class MapsActivity extends AppCompatActivity implements
     private Toolbar tToolbar;
     private Toolbar bToolbar;
     private LatLng latLng;
-    //private ImageButton homeBtn;
-    //private ImageButton searchBtn;
-    //private  ImageButton newBtn;
-    private ArrayList<String> groups;
-    //private String address;
+    private ArrayList<String> groupsId;
+    private ArrayList<String> groupsName;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
     //private Bitmap bitmap;
     private String date;
-    private String id;
+    private String userid;
     public static String finalGroupName;
-    public static Map<String,String> group = new HashMap<>();
+    public  Map<String,String> groupMap = new HashMap<>();
     private static Location uploadLocation;
-    public static String positionId;
+    public static int positionNum;
     public static double currentLatitude;
     public static double currentLongitude;
     private Bitmap bitmap;
@@ -101,6 +98,15 @@ public class MapsActivity extends AppCompatActivity implements
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
         UserNametext.setText((String) extras.get("username"));
+
+        //update groupmap
+      groupsName =(ArrayList<String>) extras.get("GroupName");
+      groupsId   =(ArrayList<String>) extras.get("GroupId");
+        for(int i=0;i<groupsName.size();i++)
+        {
+            groupMap.put(groupsName.get(i),groupsId.get(i));
+        }
+
         setSupportActionBar(tToolbar);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
         Calendar cal = Calendar.getInstance();
@@ -117,15 +123,15 @@ public class MapsActivity extends AppCompatActivity implements
                     intent.putExtra("date",date);
                     intent.putExtra("latitude",uploadLocation.getLatitude());
                     intent.putExtra("longitude",uploadLocation.getLongitude());
-                    intent.putExtra("id",id);
-                    intent.putExtra("groupId",group.get(finalGroupName));
-                    intent.putExtra("positionId",positionId);
+                    intent.putExtra("userid",userid);
+                    intent.putExtra("groupId",((Map<String,String>) extras.get("GroupInfo")).get(finalGroupName));
                     startActivity(intent);
                 }
                 else{
                     mMap.clear();
                     requestQueue.add(Json.getGroupPosition(item.toString()));
                     finalGroupName = item.toString();
+                    System.out.println("You choose the group "+ finalGroupName);
                 }
                 return true;
             }
@@ -135,9 +141,9 @@ public class MapsActivity extends AppCompatActivity implements
         //homeBtn =(ImageButton) findViewById(R.id.HomeBtn);
         //searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
         //newBtn = (ImageButton) findViewById(R.id.AddBtn);
-        groups =(ArrayList<String>) extras.get("GroupInfo");
+
         userAddress = (String) extras.get("address");
-        id = (String) extras.get("id");
+        userid = (String) extras.get("userId");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -172,9 +178,11 @@ public class MapsActivity extends AppCompatActivity implements
                 {
                     latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
-                            String.valueOf(location.getLongitude()),date,"label",id));
+                            String.valueOf(location.getLongitude()),date,userid,groupMap.get(finalGroupName)));
                 }
-                else{}
+                else{
+
+                }
             }
 
             @Override
@@ -223,7 +231,7 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setView(code);
         Intent intent = new Intent(this,MapsActivity.class);
         //requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,tToolbar.getTitle().toString(),intent,id));
+        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,tToolbar.getTitle().toString(),intent,userid));
 
     }
     public void createGroup(View view)
@@ -235,15 +243,15 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setView(groupName);
         Intent intent = new Intent(this,MapsActivity.class);
         //requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.createNewGroup(groupName,userAddress,tToolbar.getTitle().toString(),
-                this,intent,builder,id));
+        requestQueue.add(Json.createNewGroup(groupName,userAddress,UserNametext.getText().toString(),
+                this,intent,builder,userid));
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maps_menu,menu);
-        for(int i =0 ; i<groups.size();i++)
+        for(int i =0 ; i<groupsName.size();i++)
         {
-            menu.add(1,1,i,groups.get(i));
+            menu.add(1,1,i,groupsName.get(i));
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -258,8 +266,8 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Intent intent = new Intent(this,ShowActivity.class);
-        requestQueue.add(Json.getPhoto(marker.getSnippet(),group.get(finalGroupName)
-                ,(String) marker.getTag(),intent,this));
+        requestQueue.add(Json.getPhoto(marker.getSnippet(),groupMap.get(finalGroupName),marker.getPosition().latitude,marker.getPosition().longitude
+                ,intent,this));
         Toast.makeText(this,
                 marker.getTitle() +
                         " has been clicked " + " times.",

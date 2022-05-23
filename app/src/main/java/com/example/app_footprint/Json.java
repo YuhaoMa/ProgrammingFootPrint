@@ -3,8 +3,7 @@ package com.example.app_footprint;
 import static com.example.app_footprint.MapsActivity.currentLatitude;
 import static com.example.app_footprint.MapsActivity.currentLongitude;
 import static com.example.app_footprint.MapsActivity.getmMap;
-import static com.example.app_footprint.MapsActivity.group;
-import static com.example.app_footprint.MapsActivity.positionId;
+import static com.example.app_footprint.MapsActivity.positionNum;
 import static com.example.app_footprint.ShowActivity.clearData;
 import static com.example.app_footprint.ShowActivity.setData;
 
@@ -23,6 +22,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,9 +48,13 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
@@ -98,9 +103,10 @@ public class Json extends AppCompatActivity {
     }
 
     public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent
-            , Activity activity,String id)
+            , Activity activity,String userId)
     {
-        ArrayList<String> Userdata = new ArrayList<>();
+        ArrayList<String> groupname = new ArrayList<>();
+        ArrayList<String> groupid = new ArrayList<>();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
                 , url+ "getGroup/"+address, null,
                 new Response.Listener<JSONArray>() {
@@ -112,16 +118,15 @@ public class Json extends AppCompatActivity {
                             for(int i=0;i<response.length();i++)
                             {
                                 JSONObject curObject = response.getJSONObject( i );
-                                group.put(curObject.getString("GroupName").toString(),
-                                        curObject.getString("idGroup").toString());
-                                Userdata.add(curObject.getString("GroupName").toString());
-                                //System.out.println("!!!!!object+"+Userdata);
+                                groupid.add(curObject.getString("idGroup").toString());
+                                groupname.add(curObject.getString("GroupName").toString());
+
                             }
                             intent.putExtra("username",username);
                             intent.putExtra("address",address);
-                            System.out.println("Userdata!!!!!!!!!"+Userdata);
-                            intent.putExtra("GroupInfo",Userdata);
-                            intent.putExtra("id",id);
+                            intent.putExtra("GroupId",groupid);
+                            intent.putExtra("GroupName",groupname);
+                            intent.putExtra("userId",userId);
                             activity.startActivity(intent);
                         }
                         catch( JSONException e )
@@ -143,7 +148,7 @@ public class Json extends AppCompatActivity {
 
     }
     public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder
-            ,Activity activity,String address, String userName,Intent intent, String id)
+            ,Activity activity,String address, String userName,Intent intent, String userid)
     {
         ArrayList<String> codes = new ArrayList<String>();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "searchGroupCode", null,
@@ -200,7 +205,7 @@ public class Json extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                     RequestQueue requestQueue = Volley.newRequestQueue(activity);
                                     JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address
-                                            ,code.getText().toString(),intent,activity,userName,id);
+                                            ,code.getText().toString(),intent,activity,userName,userid);
                                     requestQueue.add(jsonArrayRequest1);
                             }
                         });
@@ -222,7 +227,7 @@ public class Json extends AppCompatActivity {
 
     }
     public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent
-            ,Activity activity ,String userName, String id)
+            ,Activity activity ,String userName, String userid)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
                 , url+"addGroup/"+address+"/"+code, null,
@@ -233,7 +238,7 @@ public class Json extends AppCompatActivity {
                     {
                         RequestQueue requestQueue = Volley.newRequestQueue(activity);
                         JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(address,userName
-                                ,intent,activity,id);
+                                ,intent,activity,userid);
                         requestQueue.add(jsonArrayRequest1);
                     }
                 },
@@ -273,8 +278,6 @@ public class Json extends AppCompatActivity {
     {
         GenerateCode generateCode = new GenerateCode(3);
         String Sendcode = generateCode.generateCode();
-        //System.out.println("Genearate a new Groupcode:::: "+Sendcode);
-        //System.out.println("Create a new Group name is :::: "+groupName.getText().toString());
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"createGroup/"+Sendcode+"/"+
                 groupName.getText().toString()
                 , null,
@@ -298,11 +301,10 @@ public class Json extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //System.out.println("你输入的是: " + groupName.getText().toString());
                 AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
                 builder1.setTitle("Reminder");
                 RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                System.out.println("GroupName:::::"+groupName.getText().toString());
+               // System.out.println("GroupName:::::"+groupName.getText().toString());
                 if(groupName.getText().toString()!= null)
                 {
                     builder1.setMessage("The group \""+groupName.getText().toString()
@@ -367,6 +369,7 @@ public class Json extends AppCompatActivity {
                         {
                             JSONObject curObject;
                             LatLng latLng;
+                            positionNum = response.length();
                             for(int i = 0; i < response.length();i++){
                                 curObject = response.getJSONObject(i);
                                 latLng = new LatLng(
@@ -401,10 +404,10 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
     }
 
-    public static JsonArrayRequest newPosition(String lat,String log, String date,int user,int group)
+    public static JsonArrayRequest newPosition(String lat,String log, String date,String userid,String groupId)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url + "newPosition/" + date + "/" + user+ "/" + group + "/" + lat+"/"+log
+                url + "newPosition/" + date + "/" + userid+ "/" + groupId + "/" + lat+"/"+log
                 , null,
                 new Response.Listener<JSONArray>() {
             @Override
@@ -412,8 +415,9 @@ public class Json extends AppCompatActivity {
                 LatLng latLng = new LatLng(Double.parseDouble(lat),Double.parseDouble(log));
                 Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
                         .title(date)
-                        .snippet(Integer.toString(user)));
-                marker.setTag(String.valueOf(Integer.getInteger(positionId))+1);
+                        .snippet(userid));
+                marker.setTag(positionNum);
+                positionNum += 1;
             }
         },
                 new Response.ErrorListener() {
@@ -426,9 +430,9 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
     }
 
-    public static JsonArrayRequest getGroupPosition(String name){
+    public static JsonArrayRequest getGroupPosition(String groupname){
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"getGroupPosition/"+name
+                url+"getGroupPosition/"+groupname
                 , null,
                 new Response.Listener<JSONArray>()
                 {
@@ -446,8 +450,9 @@ public class Json extends AppCompatActivity {
                                         Double.parseDouble(curObject.getString("Lon")));
                                 Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
-                                        .snippet(curObject.getString("userId")));
-                                marker.setTag(curObject.getString("idPositions"));
+                                        .snippet(curObject.getString("UserId")));
+                                //marker.setTag(curObject.getString("idPositions"));
+                                marker.setTag(i);
                             }
                         }
                         catch( JSONException e )
@@ -469,12 +474,13 @@ public class Json extends AppCompatActivity {
     }
 
     public static JsonArrayRequest addPhotoInfo(String date, String uId
-            , String gId, String pId,ProgressDialog progressDialog, Activity activity
+            , String gId, double lat,double lon ,ProgressDialog progressDialog, Activity activity
             , String imageString)
     {
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url + "addPhotoInfo/" + date + "/" + uId + "/" + gId + "/" + pId
+                url + "addPhotoInfo/" +date  + "/" + uId + "/" + gId + "/" +
+                        lat+"/"+lon
                 , null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -521,15 +527,15 @@ public class Json extends AppCompatActivity {
         return submitRequest;
     }
 
-    public static JsonArrayRequest getPhoto(String uid, String gid, String pid,Intent intent
+    public static JsonArrayRequest getPhoto(String userid, String groupid,double lat,double lon, Intent intent
             , Activity activity)
     {
         List<Map<String,Object>> data = new ArrayList<Map<String, Object>>();;
         JsonArrayRequest jsonArrayRequest;
         clearData();
-        if(gid==null){
+        if(groupid==null){
             jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                    url+"getMyPhoto/"+uid+"/"+pid
+                    url+"getMyPhoto/"+userid+"/"+lat+"/"+lon
                     , null,
                     new Response.Listener<JSONArray>()
                     {
@@ -569,7 +575,7 @@ public class Json extends AppCompatActivity {
         }
         else{
             jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                    url+"getGroupPhotos/"+uid+"/"+gid+"/"+pid
+                    url+"getGroupPhotos/"+userid+"/"+groupid+"/"+lat+"/"+lon
                     , null,
                     new Response.Listener<JSONArray>()
                     {
