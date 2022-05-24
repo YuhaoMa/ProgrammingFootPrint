@@ -213,10 +213,9 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     public void onBtnHome_Clicked(View caller) {
-        //Intent intent = new Intent(this,MainActivity.class);
-        //startActivity(intent);
         mMap.clear();
         requestQueue.add(Json.getMyPosition(userAddress));
+        Toast.makeText(this, "Return to My Homepage", Toast.LENGTH_SHORT).show();
     }
 
     public void searchGroup(View view){
@@ -262,7 +261,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Intent intent = new Intent(this,ShowActivity.class);
-        requestQueue.add(Json.getPhoto(marker.getSnippet(),groupMap.get(finalGroupName),marker.getPosition().latitude,marker.getPosition().longitude
+        requestQueue.add(Json.getPhoto(userid,groupMap.get(finalGroupName),marker.getPosition().latitude,marker.getPosition().longitude
                 ,intent,this));
         Toast.makeText(this,
                 marker.getTitle() +

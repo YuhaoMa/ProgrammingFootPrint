@@ -34,7 +34,7 @@ public class ShowActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show);
         gridView = (GridView) findViewById(R.id.view_photo);
         simpleAdapter = new SimpleAdapter(this,data,R.layout.grid_item,
-                new String[]{"img","txt"},new int[]{R.id.img_item,R.id.txt_item});
+                new String[]{"img","date","name"},new int[]{R.id.img_item,R.id.date_item,R.id.name_item});
         simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Object bitmapData, String s) {
@@ -49,17 +49,18 @@ public class ShowActivity extends AppCompatActivity {
         gridView.setAdapter(simpleAdapter);
     }
 
-    public static void setData(Bitmap bitmap, String date) {
+    public static void setData(Bitmap bitmap, String date,String name) {
             Map<String,Object> map = new HashMap<String,Object>();
             map.put("img",bitmap);
-            map.put("txt",date);
+            map.put("date",date);
+            map.put("name",name);    //simpleAdapter 也要改
+
             data.add(map);
     }
 
     public static void clearData(){
         data.clear();
     }
-
     public void onClick_return(View caller){
         finish();
     }

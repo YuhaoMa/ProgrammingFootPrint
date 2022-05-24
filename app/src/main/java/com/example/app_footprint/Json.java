@@ -611,7 +611,8 @@ public class Json extends AppCompatActivity {
                                     byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
                                     bitmap = BitmapFactory.decodeByteArray( imageBytes
                                             , 0, imageBytes.length );
-                                    setData(bitmap,curObject.getString("date"));
+                                    setData(bitmap,curObject.getString("date")
+                                            ,curObject.getString("Name"));
                                 }
                                 activity.startActivity(intent);
                             }
@@ -633,7 +634,7 @@ public class Json extends AppCompatActivity {
         }
         else{
             jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                    url+"getGroupPhotos/"+userid+"/"+groupid+"/"+lat+"/"+lon
+                    url+"getGroupPhotos/"+groupid+"/"+lat+"/"+lon
                     , null,
                     new Response.Listener<JSONArray>()
                     {
@@ -651,7 +652,8 @@ public class Json extends AppCompatActivity {
                                     byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
                                     bitmap = BitmapFactory.decodeByteArray( imageBytes
                                             , 0, imageBytes.length );
-                                    setData(bitmap,curObject.getString("date"));
+                                    setData(bitmap,curObject.getString("date")
+                                            ,curObject.getString("Name"));
                                 }
                                 activity.startActivity(intent);
                             }
