@@ -139,6 +139,8 @@ public class MapsActivity extends AppCompatActivity implements
                     mMap.clear();
                     requestQueue.add(Json.getGroupPosition(item.toString()));
                     finalGroupName = item.toString();
+                    Toast.makeText(MapsActivity.this, "To Group "+finalGroupName
+                            , Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
@@ -263,10 +265,6 @@ public class MapsActivity extends AppCompatActivity implements
         Intent intent = new Intent(this,ShowActivity.class);
         requestQueue.add(Json.getPhoto(userid,groupMap.get(finalGroupName),marker.getPosition().latitude,marker.getPosition().longitude
                 ,intent,this));
-        Toast.makeText(this,
-                marker.getTitle() +
-                        " has been clicked " + " times.",
-                Toast.LENGTH_SHORT).show();
         return false;
     }
 
