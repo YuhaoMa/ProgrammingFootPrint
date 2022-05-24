@@ -119,13 +119,22 @@ public class MapsActivity extends AppCompatActivity implements
             public boolean onMenuItemClick(MenuItem item) {
                 int itemId = item.getItemId();
                 if(itemId == R.id.addP){
-                    intent.putExtra("address",userAddress);
-                    intent.putExtra("date",date);
-                    intent.putExtra("latitude",uploadLocation.getLatitude());
-                    intent.putExtra("longitude",uploadLocation.getLongitude());
-                    intent.putExtra("userid",userid);
-                    intent.putExtra("groupId",((Map<String,String>) extras.get("GroupInfo")).get(finalGroupName));
-                    startActivity(intent);
+                    if(groupMap.get(finalGroupName)==null)
+                        {
+                            Toast.makeText(MapsActivity.this,"You are not in a group",
+                                    Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        intent.putExtra("address",userAddress);
+                        intent.putExtra("date",date);
+                        intent.putExtra("latitude",uploadLocation.getLatitude());
+                        intent.putExtra("longitude",uploadLocation.getLongitude());
+                        intent.putExtra("userid",userid);
+                        intent.putExtra("groupId",groupMap.get(finalGroupName));
+                        startActivity(intent);
+                    }
+
                 }
                 else{
                     mMap.clear();
@@ -138,10 +147,6 @@ public class MapsActivity extends AppCompatActivity implements
 
         });
         bToolbar = (Toolbar) findViewById(R.id.toolbar3);
-        //homeBtn =(ImageButton) findViewById(R.id.HomeBtn);
-        //searchBtn = (ImageButton) findViewById(R.id.SearchBtn);
-        //newBtn = (ImageButton) findViewById(R.id.AddBtn);
-
         userAddress = (String) extras.get("address");
         userid = (String) extras.get("userId");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

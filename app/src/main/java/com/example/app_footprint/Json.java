@@ -58,8 +58,8 @@ import java.util.Set;
 
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
-    public static JsonArrayRequest getUserInfo(String email,String password,TextView textView
-            ,Intent intent,Activity activity)
+    public static JsonArrayRequest getUserInfo(String email, String password, TextView textView
+            , Intent intent, Activity activity)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + email,
                 null,
@@ -575,7 +575,6 @@ public class Json extends AppCompatActivity {
     public static JsonArrayRequest getPhoto(String userid, String groupid,double lat,double lon, Intent intent
             , Activity activity)
     {
-        List<Map<String,Object>> data = new ArrayList<Map<String, Object>>();;
         JsonArrayRequest jsonArrayRequest;
         clearData();
         if(groupid==null){
