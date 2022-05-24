@@ -34,7 +34,10 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
+import com.example.app_footprint.module.AppStateNotifier;
 import com.example.app_footprint.module.Position;
+import com.example.app_footprint.module.UserModel;
+import com.example.app_footprint.module.UserModelInter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -52,6 +55,7 @@ public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
     public static ArrayList<Double> myLatitude = new ArrayList<>();
     public static ArrayList<Double> myLongitude = new ArrayList<>();
+
     public static JsonArrayRequest getUserInfo(String email,String password,TextView textView
             ,Intent intent,Activity activity)
     {
@@ -426,7 +430,7 @@ public class Json extends AppCompatActivity {
                                         Double.parseDouble(curObject.getString("Lon")));
                                 Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
-                                        .snippet(curObject.getString("userId")));
+                                        .snippet(curObject.getString("Name")));
                                 //marker.setTag(curObject.getString("idPhoto"));
                                 marker.setTag(i);
                                 if(i==response.length()-1){
@@ -502,7 +506,7 @@ public class Json extends AppCompatActivity {
                                         Double.parseDouble(curObject.getString("Lon")));
                                 Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
-                                        .snippet(curObject.getString("UserId")));
+                                        .snippet("Recently posted by : "+curObject.getString("Name")));
                                 //marker.setTag(curObject.getString("idPositions"));
                                 myLatitude.add(Double.parseDouble(curObject.getString("Lat")));
                                 myLongitude.add(Double.parseDouble(curObject.getString("Lon")));
