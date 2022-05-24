@@ -1,37 +1,26 @@
 package com.example.app_footprint;
 
+import static com.example.app_footprint.Json.myLatitude;
+import static com.example.app_footprint.Json.myLongitude;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PhotoActivity extends AppCompatActivity {
     private ImageView image;
@@ -40,6 +29,8 @@ public class PhotoActivity extends AppCompatActivity {
     private Bitmap bitmap;
     private ProgressDialog progressDialog;
     private Bundle extras;
+    private boolean flag = false;
+    private int i = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,10 +38,26 @@ public class PhotoActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
+        selectPosition();
         System.out.println((String) extras.get("date"));
         System.out.println((String) extras.get("id"));
         System.out.println((String) extras.get("groupId"));
     }
+
+    private void selectPosition() {
+        double latitude = (double)extras.get("latitude");
+        double longitude = (double)extras.get("longitude");
+        System.out.println(myLatitude.toString());
+        while(flag == false && i < myLatitude.size()) {
+            if (Math.abs(latitude - myLatitude.get(i)) < 0.05 &&
+                    Math.abs(longitude - myLongitude.get(i)) < 0.05) {
+                flag = true;
+                break;
+            }
+            i++;
+        }
+    }
+
     public void onBtnPickClicked(View caller)
     {
         Intent intent = new Intent();
@@ -82,11 +89,6 @@ public class PhotoActivity extends AppCompatActivity {
     public void onBtnPostClicked(View caller)
     {
         //Start an animating progress widget
-        if((String)extras.get("groupId") == null){
-            Toast.makeText(this, "You are not in a group.", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        else {
             progressDialog = new ProgressDialog(PhotoActivity.this);
             progressDialog.setMessage("Uploading, please wait...");
             progressDialog.show();
@@ -96,15 +98,25 @@ public class PhotoActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] imageBytes = baos.toByteArray();
             final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-
-            requestQueue.add(Json.addPhotoInfo((String) extras.get("date"),(String) extras.get("id")
-                    ,(String) extras.get("groupId"),
-                    (double)extras.get("latitude"),(double)extras.get("longitude")
-                    , progressDialog
-                    ,this,imageString));
-
+            if(flag){
+                System.out.println();
+                requestQueue.add(Json.addPhotoInfo((String) extras.get("date"),(String) extras.get("userid")
+                        ,(String) extras.get("groupId"),
+                        myLatitude.get(i),myLongitude.get(i), progressDialog,this
+                        ,imageString));
+            }
+            else {
+                System.out.println((String) extras.get("date"));
+                System.out.println((String) extras.get("userid"));
+                System.out.println((String) extras.get("groupId"));
+                System.out.println((double) extras.get("latitude"));
+                System.out.println((double) extras.get("longitude"));
+                requestQueue.add(Json.addPhotoInfo((String) extras.get("date"), (String) extras.get("userid")
+                        , (String) extras.get("groupId"), (double) extras.get("latitude")
+                        , (double) extras.get("longitude"), progressDialog, this, imageString));
+            }
             finish();
-        }
+
     }
 
 

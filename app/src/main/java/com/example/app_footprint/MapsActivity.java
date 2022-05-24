@@ -56,6 +56,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,24 +94,22 @@ public class MapsActivity extends AppCompatActivity implements
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         requestQueue = Volley.newRequestQueue(this);
-        //requestQueue.add(Json.showPhoto());
         Bundle extras = getIntent().getExtras();
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
         UserNametext.setText((String) extras.get("username"));
-
         //update groupmap
-      groupsName =(ArrayList<String>) extras.get("GroupName");
-      groupsId   =(ArrayList<String>) extras.get("GroupId");
+        groupsName =(ArrayList<String>) extras.get("GroupName");
+        groupsId   =(ArrayList<String>) extras.get("GroupId");
         for(int i=0;i<groupsName.size();i++)
         {
             groupMap.put(groupsName.get(i),groupsId.get(i));
         }
 
         setSupportActionBar(tToolbar);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        Calendar cal = Calendar.getInstance();
-        date = dateFormat.format(cal.getTime());
+        Date dNow = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        date = sdf.format(dNow);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         Intent intent = new Intent(this,PhotoActivity.class);
         tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -140,7 +139,6 @@ public class MapsActivity extends AppCompatActivity implements
                     mMap.clear();
                     requestQueue.add(Json.getGroupPosition(item.toString()));
                     finalGroupName = item.toString();
-                    System.out.println("You choose the group "+ finalGroupName);
                 }
                 return true;
             }
@@ -178,16 +176,7 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 uploadLocation = location;
-                if(Math.abs(currentLatitude - location.getLatitude()) > 0.05 &&
-                Math.abs(currentLongitude - location.getLongitude()) > 0.05)
-                {
-                    latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    requestQueue.add(Json.newPosition(String.valueOf(location.getLatitude()),
-                            String.valueOf(location.getLongitude()),date,userid,groupMap.get(finalGroupName)));
-                }
-                else{
-
-                }
+                System.out.println(uploadLocation.toString());
             }
 
             @Override
@@ -238,7 +227,7 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setView(code);
         Intent intent = new Intent(this,MapsActivity.class);
         //requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,tToolbar.getTitle().toString(),intent,userid));
+        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,UserNametext.getText().toString(),intent,userid));
 
     }
     public void createGroup(View view)

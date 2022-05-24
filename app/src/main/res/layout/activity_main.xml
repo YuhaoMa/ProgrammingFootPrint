@@ -62,7 +62,7 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:text="Password"
         android:textColor="#000000"
         app:layout_constraintStart_toStartOf="@+id/textView"
@@ -79,21 +79,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-    <Button
-        android:id="@+id/btn_forget"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="250dp"
-        android:layout_marginTop="36dp"
-        android:background="#FFFFFF"
-        android:onClick="forgetBtn_Clicker"
-        android:shadowRadius="0"
-        android:text="forget your password?"
-        android:textColor="#000000"
-        android:textSize="8sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/editTextTextPassword" />
 
     <Button
         android:id="@+id/btn_register"
@@ -114,6 +99,16 @@
         android:layout_height="wrap_content"
         android:textColor="#FF0000"
         app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/txtName" />
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="250dp"
+        android:onClick="forgetBtn_Clicker"
+        android:text="Forget Your Password?"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

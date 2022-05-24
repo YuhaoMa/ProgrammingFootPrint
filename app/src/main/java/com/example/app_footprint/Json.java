@@ -14,16 +14,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
-import android.os.Parcelable;
+import android.location.Location;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -37,7 +34,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.example.app_footprint.module.Position;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -46,20 +43,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
-    public static JsonArrayRequest getUserInfo(String email, String password, TextView textView
-            , Intent intent, Activity activity)
+    public static ArrayList<Double> myLatitude = new ArrayList<>();
+    public static ArrayList<Double> myLongitude = new ArrayList<>();
+    public static JsonArrayRequest getUserInfo(String email,String password,TextView textView
+            ,Intent intent,Activity activity)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + email,
                 null,
@@ -72,6 +66,7 @@ public class Json extends AppCompatActivity {
                             }
                             else{
                                 Toast.makeText(activity, "Login Successfully", Toast.LENGTH_SHORT).show();
+                                textView.setText("");
                                 String userName = response.getJSONObject(0).getString("Name");
                                 RequestQueue requestQueue = Volley.newRequestQueue(activity);
                                 JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(email,userName
@@ -93,7 +88,8 @@ public class Json extends AppCompatActivity {
     }
 
     public static JsonArrayRequest forgetMyPassword(String address, AlertDialog.Builder builder,
-                                                    Activity activity){
+                                                    Activity activity)
+    {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + address,
                 null,
                 new Response.Listener<JSONArray>() {
@@ -148,6 +144,7 @@ public class Json extends AppCompatActivity {
                 });
         return jsonArrayRequest;
     }
+
     public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent
             , Activity activity,String userId)
     {
@@ -158,7 +155,6 @@ public class Json extends AppCompatActivity {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        // System.out.println("response!!!!!!!!!!!!!!!!!!!"+response);
                         try
                         {
                             for(int i=0;i<response.length();i++)
@@ -193,6 +189,7 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
 
     }
+
     public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder
             ,Activity activity,String address, String userName,Intent intent, String userid)
     {
@@ -201,13 +198,11 @@ public class Json extends AppCompatActivity {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-
                         try
                         {
                             for(int i=0;i<response.length();i++)
                             {
                                 JSONObject curObject = response.getJSONObject( i );
-                                //System.out.println("Group Code INfo:::::::::::::::"+curObject);
                                 codes.add(curObject.get("code").toString());
                             }
                         }
@@ -222,7 +217,6 @@ public class Json extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
-                        //System.out.println("Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         error.printStackTrace();
                     }
                 }
@@ -231,7 +225,6 @@ public class Json extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //System.out.println("你输入的是: " + code.getText().toString());
                 AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
                 builder1.setTitle("Reminder");
                 boolean check = false;
@@ -269,9 +262,8 @@ public class Json extends AppCompatActivity {
         AlertDialog dialog=builder.create();
         dialog.show();
         return jsonArrayRequest;
-
-
     }
+
     public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent
             ,Activity activity ,String userName, String userid)
     {
@@ -475,7 +467,8 @@ public class Json extends AppCompatActivity {
         return jsonArrayRequest;
     }
 
-    public static JsonArrayRequest getGroupPosition(String groupname){
+    public static JsonArrayRequest getGroupPosition(String groupname)
+    {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"getGroupPosition/"+groupname
                 , null,
@@ -488,6 +481,8 @@ public class Json extends AppCompatActivity {
                         {
                             JSONObject curObject;
                             LatLng latLng ;
+                            myLatitude.clear();
+                            myLongitude.clear();
                             for(int i = 0; i < response.length();i++){
                                 curObject = response.getJSONObject(i);
                                 latLng = new LatLng(
@@ -497,6 +492,8 @@ public class Json extends AppCompatActivity {
                                         .title(curObject.getString("date"))
                                         .snippet(curObject.getString("UserId")));
                                 //marker.setTag(curObject.getString("idPositions"));
+                                myLatitude.add(Double.parseDouble(curObject.getString("Lat")));
+                                myLongitude.add(Double.parseDouble(curObject.getString("Lon")));
                                 marker.setTag(i);
                             }
                         }
@@ -525,7 +522,7 @@ public class Json extends AppCompatActivity {
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                 url + "addPhotoInfo/" +date  + "/" + uId + "/" + gId + "/" +
-                        lat+"/"+lon
+                        String.valueOf(lat)+"/"+String.valueOf(lon)
                 , null,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -546,7 +543,8 @@ public class Json extends AppCompatActivity {
     }
 
     public static StringRequest addPhoto(ProgressDialog progressDialog,Activity activity
-            ,String imageString){
+            ,String imageString)
+    {
         StringRequest submitRequest = new StringRequest (Request.Method.POST
                 , url+"addPhoto"
                 ,  new Response.Listener<String>() {

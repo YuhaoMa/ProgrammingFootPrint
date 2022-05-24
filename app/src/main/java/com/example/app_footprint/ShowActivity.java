@@ -32,7 +32,6 @@ public class ShowActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show);
-       // displayData();
         gridView = (GridView) findViewById(R.id.view_photo);
         simpleAdapter = new SimpleAdapter(this,data,R.layout.grid_item,
                 new String[]{"img","txt"},new int[]{R.id.img_item,R.id.txt_item});
@@ -59,12 +58,6 @@ public class ShowActivity extends AppCompatActivity {
 
     public static void clearData(){
         data.clear();
-    }
-
-    public static void displayData(){
-        for(int i = 0; i < data.size(); i++){
-            System.out.println(data.get(i).toString());
-        }
     }
 
     public void onClick_return(View caller){
