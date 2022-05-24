@@ -60,15 +60,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 String emailaddress = textEmail.getText().toString();
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
-                if(address == null){
+                if(emailaddress.equals("")){
                     builder1.setMessage("Email address can't be empty.");
                     builder1.setPositiveButton("Close",null);
+                    AlertDialog dialog1 = builder1.create();
+                    dialog1.show();
                 }
                 else{
                     requestQueue.add(Json.forgetMyPassword(emailaddress,builder1,MainActivity.this));
                 }
-                AlertDialog dialog1 = builder1.create();
-                dialog1.show();
+
             }
         });
         AlertDialog dialog = builder.create();

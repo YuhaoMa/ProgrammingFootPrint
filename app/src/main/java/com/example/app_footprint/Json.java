@@ -106,24 +106,33 @@ public class Json extends AppCompatActivity {
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
-                                        builder2.setMessage("Enter the new Password ");
-                                        EditText textPassword = new EditText(activity);
-                                        builder2.setView(textPassword);
-                                        builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                AlertDialog.Builder builder3 = new AlertDialog.Builder(activity);
-                                                builder3.setMessage("Set Successfully ");
-                                                builder3.setPositiveButton("OK", null);
-                                                Intent intent = new Intent(activity, MainActivity.class);
-                                                RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                                                requestQueue.add(Json.changePassword(textPassword.getText().toString(),address,
-                                                        intent,builder3,activity));
-                                            }
-                                        });
-                                        AlertDialog dialog2 = builder2.create();
-                                        dialog2.show();
+                                        if(textCode.getText().toString().equals(Sendcode)){
+                                            AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
+                                            builder2.setMessage("Enter the new Password ");
+                                            EditText textPassword = new EditText(activity);
+                                            builder2.setView(textPassword);
+                                            builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    AlertDialog.Builder builder3 = new AlertDialog.Builder(activity);
+                                                    builder3.setMessage("Set Successfully ");
+                                                    builder3.setPositiveButton("OK", null);
+                                                    AlertDialog dialog3 = builder3.create();
+                                                    dialog3.show();
+                                                    Intent intent = new Intent(activity, MainActivity.class);
+                                                    RequestQueue requestQueue = Volley.newRequestQueue(activity);
+                                                    requestQueue.add(Json.changePassword(textPassword.getText().toString(),address,
+                                                            intent,builder3,activity));
+                                                }
+
+                                            });
+                                            AlertDialog dialog2 = builder2.create();
+                                            dialog2.show();
+                                        }
+                                        else {
+                                            Toast.makeText(activity, "Incorrect Code", Toast.LENGTH_SHORT).show();
+                                        }
+
                                     }
                                 });
                                 AlertDialog dialog1 = builder.create();
@@ -139,7 +148,10 @@ public class Json extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        //builder.setMessage("Email address can't be empty.");
+                        //builder.setPositiveButton("Close",null);
+                        //AlertDialog dialog1 = builder.create();
+                        //dialog1.show();
                     }
                 });
         return jsonArrayRequest;
