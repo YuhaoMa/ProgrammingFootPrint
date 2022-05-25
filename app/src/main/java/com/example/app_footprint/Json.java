@@ -4,18 +4,12 @@ import static com.example.app_footprint.MapsActivity.currentLatitude;
 import static com.example.app_footprint.MapsActivity.currentLongitude;
 import static com.example.app_footprint.MapsActivity.getmMap;
 import static com.example.app_footprint.MapsActivity.positionNum;
-import static com.example.app_footprint.ShowActivity.clearData;
-import static com.example.app_footprint.ShowActivity.setData;
 
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -34,10 +28,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
-import com.example.app_footprint.module.AppStateNotifier;
-import com.example.app_footprint.module.Position;
-import com.example.app_footprint.module.UserModel;
-import com.example.app_footprint.module.UserModelInter;
+import com.example.app_footprint.module.Photo;
+import com.example.app_footprint.module.Photos;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -53,9 +45,13 @@ import java.util.Map;
 
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
+    private RequestQueue requestQueue;
     public static ArrayList<Double> myLatitude = new ArrayList<>();
     public static ArrayList<Double> myLongitude = new ArrayList<>();
 
+    public Json(RequestQueue requestQueue){
+        this.requestQueue = requestQueue;
+    }
     public static JsonArrayRequest getUserInfo(String email,String password,TextView textView
             ,Intent intent,Activity activity)
     {
@@ -586,7 +582,7 @@ public class Json extends AppCompatActivity {
         return submitRequest;
     }
 
-    public static JsonArrayRequest getPhoto(String userid, String groupid,double lat,double lon, Intent intent
+    /*public static JsonArrayRequest getPhoto(String userid, String groupid,double lat,double lon, Intent intent
             , Activity activity)
     {
         JsonArrayRequest jsonArrayRequest;
@@ -676,7 +672,7 @@ public class Json extends AppCompatActivity {
         }
         return jsonArrayRequest;
 
-    }
+    }*/
 
     public static JsonArrayRequest changePassword(String password, String emailaddress, Intent intent, AlertDialog.Builder builder, Activity activity)
     {
@@ -704,5 +700,97 @@ public class Json extends AppCompatActivity {
         activity.startActivity(intent);
         return jsonArrayRequest;
 
+    }
+
+    public Photos getPhoto(Photos photos)
+    {
+        JsonArrayRequest jsonArrayRequest;
+        if(photos.getGroupId() == 0){
+            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                    url+"getMyPhoto/"+photos.getUserId()+"/"+photos.getLatitude()+"/"+photos.getLongitude()
+                    , null,
+                    new Response.Listener<JSONArray>()
+                    {
+                        @Override
+                        public void onResponse(JSONArray response)
+                        {
+                            List<Photo> myPhotos = new ArrayList<>();
+                            try
+                            {
+                                JSONObject curObject;
+                                String photoBase;
+                                String name;
+                                String date;
+                                for(int i = 0; i < response.length();i++){
+                                    curObject = response.getJSONObject(i);
+                                    photoBase = curObject.getString("PhotoBase");
+                                    name = curObject.getString("Name");
+                                    date = curObject.getString("date");
+                                    Photo photo = new Photo(name,date,photoBase);
+                                    myPhotos.add(photo);
+                                }
+                            }
+                            catch( JSONException e )
+                            {
+                                Log.e( "Database", e.getMessage(), e );
+                            }
+
+                            photos.setPhotos(myPhotos);
+                        }
+                    },
+                    new Response.ErrorListener()
+                    {
+                        @Override
+                        public void onErrorResponse(VolleyError error)
+                        {
+                            error.getLocalizedMessage();
+                        }
+                    }
+            );
+        }
+        else{
+            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                    url+"getGroupPhotos/"+photos.getGroupId()+"/"+photos.getLatitude()+"/"+photos.getLongitude()
+                    , null,
+                    new Response.Listener<JSONArray>()
+                    {
+                        @Override
+                        public void onResponse(JSONArray response)
+                        {
+                            List<Photo> myPhotos = new ArrayList<>();
+                            try
+                            {
+                                JSONObject curObject = new JSONObject();
+                                String photoBase;
+                                String name;
+                                String date;
+                                for(int i = 0; i < response.length();i++){
+                                    curObject = response.getJSONObject(i);
+                                    photoBase = curObject.getString("PhotoBase");
+                                    name = curObject.getString("Name");
+                                    date = curObject.getString("date");
+                                    Photo photo = new Photo(name,date,photoBase);
+                                    myPhotos.add(photo);
+                                }
+                                //activity.startActivity(intent);
+                            }
+                            catch( JSONException e )
+                            {
+                                Log.e( "Database", e.getMessage(), e );
+                            }
+                        }
+                    },
+                    new Response.ErrorListener()
+                    {
+                        @Override
+                        public void onErrorResponse(VolleyError error)
+                        {
+                            error.getLocalizedMessage();
+                        }
+                    }
+            );
+        }
+        requestQueue.add(jsonArrayRequest);
+        return photos;
     }
 }

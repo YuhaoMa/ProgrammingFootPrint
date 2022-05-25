@@ -263,8 +263,15 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Intent intent = new Intent(this,ShowActivity.class);
-        requestQueue.add(Json.getPhoto(userid,groupMap.get(finalGroupName),marker.getPosition().latitude,marker.getPosition().longitude
-                ,intent,this));
+        int groupid = 0;
+        if(groupMap.get(finalGroupName)==null){
+            groupid = 0;
+        }
+        intent.putExtra("userid",Integer.valueOf(userid));
+        intent.putExtra("groupid",groupid);
+        intent.putExtra("latitude",marker.getPosition().latitude);
+        intent.putExtra("longitude",marker.getPosition().longitude);
+        startActivity(intent);
         return false;
     }
 

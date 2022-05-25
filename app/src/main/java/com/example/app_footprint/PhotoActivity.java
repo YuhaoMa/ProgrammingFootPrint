@@ -39,9 +39,6 @@ public class PhotoActivity extends AppCompatActivity {
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
         selectPosition();
-        System.out.println((String) extras.get("date"));
-        System.out.println((String) extras.get("id"));
-        System.out.println((String) extras.get("groupId"));
     }
 
     private void selectPosition() {
@@ -99,18 +96,12 @@ public class PhotoActivity extends AppCompatActivity {
             byte[] imageBytes = baos.toByteArray();
             final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
             if(flag){
-                System.out.println();
                 requestQueue.add(Json.addPhotoInfo((String) extras.get("date"),(String) extras.get("userid")
                         ,(String) extras.get("groupId"),
                         myLatitude.get(i),myLongitude.get(i), progressDialog,this
                         ,imageString));
             }
             else {
-                System.out.println((String) extras.get("date"));
-                System.out.println((String) extras.get("userid"));
-                System.out.println((String) extras.get("groupId"));
-                System.out.println((double) extras.get("latitude"));
-                System.out.println((double) extras.get("longitude"));
                 requestQueue.add(Json.addPhotoInfo((String) extras.get("date"), (String) extras.get("userid")
                         , (String) extras.get("groupId"), (double) extras.get("latitude")
                         , (double) extras.get("longitude"), progressDialog, this, imageString));
