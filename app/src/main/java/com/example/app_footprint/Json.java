@@ -8,6 +8,7 @@ import static com.example.app_footprint.MapsActivity.positionNum;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
@@ -29,11 +30,14 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
+import com.example.app_footprint.module.AbstractPositions;
+import com.example.app_footprint.module.MainAndMap;
 import com.example.app_footprint.module.Photo;
 import com.example.app_footprint.module.PhotoActivityModel;
 import com.example.app_footprint.module.Photos;
 import com.example.app_footprint.module.Position;
 import com.example.app_footprint.module.Positions;
+import com.example.app_footprint.module.UserModel;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -42,6 +46,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,32 +55,28 @@ import java.util.Map;
 public class Json extends AppCompatActivity {
     private final static String url = "https://studev.groept.be/api/a21pt105/";
     private RequestQueue requestQueue;
-    public static ArrayList<Double> myLatitude = new ArrayList<>();
-    public static ArrayList<Double> myLongitude = new ArrayList<>();
+    private Context controller;
 
     public Json(RequestQueue requestQueue){
         this.requestQueue = requestQueue;
     }
-    public static JsonArrayRequest getUserInfo(String email,String password,TextView textView
-            ,Intent intent,Activity activity)
+
+    public void getUserInfo(UserModel inUser,TextView textView)
     {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + email,
-                null,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url + "getUserInfo/" + inUser.getAddress(), null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
-                            if (!response.getJSONObject(0).getString("Password").equals(password)) {
+                            if (!response.getJSONObject(0).getString("Password").equals(inUser.getPassword())) {
                                 textView.setText("Incorrect Password");
                             }
                             else{
-                                Toast.makeText(activity, "Login Successfully", Toast.LENGTH_SHORT).show();
-                                textView.setText("");
-                                String userName = response.getJSONObject(0).getString("Name");
-                                RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                                JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(email,userName
-                                        ,intent,activity,response.getJSONObject(0).getString("idUsers"));
-                                requestQueue.add(jsonArrayRequest1);
+                                inUser.setUserId(response.getJSONObject(0).getString("idUsers"));
+                                inUser.setUserName(response.getJSONObject(0).getString("Name"));
+                                inUser.jumpToMap();
+
                             }
                         } catch (JSONException e) {
                             textView.setText("Invalid User, Please Sing Up");
@@ -88,64 +89,25 @@ public class Json extends AppCompatActivity {
                         error.printStackTrace();
                     }
                 });
-        return jsonArrayRequest;
+        requestQueue.add(jsonArrayRequest);
     }
 
-    public static JsonArrayRequest forgetMyPassword(String address, AlertDialog.Builder builder,
-                                                    Activity activity)
+    public void forgetMyPassword(UserModel inUser)
     {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + address,
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + inUser.getAddress(),
                 null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try{
-                            if(address.equals(response.getJSONObject(0).getString("emailaddress"))){
-                                GenerateCode generateCode = new GenerateCode(8);
-                                String Sendcode = generateCode.generateCode();
-                                SendMailUtil.send(address, Sendcode, 3, null);
-                                builder.setMessage("Enter the Verification Code ");
-                                EditText textCode = new EditText(activity);
-                                builder.setView(textCode);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        if(textCode.getText().toString().equals(Sendcode)){
-                                            AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
-                                            builder2.setMessage("Enter the new Password ");
-                                            EditText textPassword = new EditText(activity);
-                                            builder2.setView(textPassword);
-                                            builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    AlertDialog.Builder builder3 = new AlertDialog.Builder(activity);
-                                                    builder3.setMessage("Set Successfully ");
-                                                    builder3.setPositiveButton("OK", null);
-                                                    AlertDialog dialog3 = builder3.create();
-                                                    dialog3.show();
-                                                    Intent intent = new Intent(activity, MainActivity.class);
-                                                    RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                                                    requestQueue.add(Json.changePassword(textPassword.getText().toString(),address,
-                                                            intent,builder3,activity));
-                                                }
-
-                                            });
-                                            AlertDialog dialog2 = builder2.create();
-                                            dialog2.show();
-                                        }
-                                        else {
-                                            Toast.makeText(activity, "Incorrect Code", Toast.LENGTH_SHORT).show();
-                                        }
-
-                                    }
-                                });
-                                AlertDialog dialog1 = builder.create();
-                                dialog1.show();
+                            if(inUser.getAddress().equals(response.getJSONObject(0).getString("emailaddress"))){
+                                inUser.setSendCode();
+                                inUser.setUserId(response.getJSONObject(0).getString("idUsers"));
+                                inUser.setUserName(response.getJSONObject(0).getString("Name"));
                             }
                         }
                         catch (JSONException e){
-                            builder.setMessage("User doesn't exist!");
-                            builder.setPositiveButton("Close",null);
+                            inUser.notifyErrorView();
                         }
                     }
                 },
@@ -158,34 +120,30 @@ public class Json extends AppCompatActivity {
                         //dialog1.show();
                     }
                 });
-        return jsonArrayRequest;
+        requestQueue.add(jsonArrayRequest);
     }
 
-    public static JsonArrayRequest LoginSuccessfully(String address, String username, Intent intent
-            , Activity activity,String userId)
+    public void LoginSuccessfully(UserModel inModel)
     {
-        ArrayList<String> groupname = new ArrayList<>();
-        ArrayList<String> groupid = new ArrayList<>();
+        System.out.println(inModel.getEmail());
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
-                , url+ "getGroup/"+address, null,
+                , url+ "getGroup/"+inModel.getAddress(), null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try
-                        {
+                        {   String groupName;
+                            String groupid;
+                            Map<String, String> tempGroupMap = new HashMap<>();
                             for(int i=0;i<response.length();i++)
                             {
                                 JSONObject curObject = response.getJSONObject( i );
-                                groupid.add(curObject.getString("idGroup").toString());
-                                groupname.add(curObject.getString("GroupName").toString());
-
+                                groupid = curObject.getString("idGroup");
+                                groupName = curObject.getString("GroupName");
+                                tempGroupMap.put(groupName,groupid);
                             }
-                            intent.putExtra("username",username);
-                            intent.putExtra("address",address);
-                            intent.putExtra("GroupId",groupid);
-                            intent.putExtra("GroupName",groupname);
-                            intent.putExtra("userId",userId);
-                            activity.startActivity(intent);
+                            inModel.setGroupMap(tempGroupMap);
+
                         }
                         catch( JSONException e )
                         {
@@ -202,25 +160,41 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-        return jsonArrayRequest;
-
+        requestQueue.add(jsonArrayRequest);
+        //return inPosition;
     }
 
-    public static JsonArrayRequest SearchGroup(EditText code, AlertDialog.Builder builder
-            ,Activity activity,String address, String userName,Intent intent, String userid)
+    public void LoginSuccessfully(Positions inModel,View caller)
     {
-        ArrayList<String> codes = new ArrayList<String>();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+ "searchGroupCode", null,
+        System.out.println(inModel.getEmail());
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url+ "getGroup/"+inModel.getEmail(), null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try
-                        {
+                        {   String groupName;
+                            String groupid;
+                            Map<String, String> tempGroupMap = new HashMap<>();
                             for(int i=0;i<response.length();i++)
                             {
                                 JSONObject curObject = response.getJSONObject( i );
-                                codes.add(curObject.get("code").toString());
+                                groupid = curObject.getString("idGroup");
+                                groupName = curObject.getString("GroupName");
+                                System.out.println("rwerwerqerq");
+                                tempGroupMap.put(groupName,groupid);
                             }
+                            for(int i = 0 ; i < tempGroupMap.size();i++){
+                                System.out.println("!!!!!!!");
+                            }
+                            inModel.setGroupMap(tempGroupMap);
+                            Intent intent = new Intent(controller, MapsActivity.class);
+                            intent.putExtra("Positions",(Serializable) inModel.getGroupMap());
+                            intent.putExtra("username",inModel.getUserName());
+                            intent.putExtra("address",inModel.getEmail());
+                            intent.putExtra("userId",inModel.getUserId());
+                            controller.startActivity(intent);
+                            finish();
                         }
                         catch( JSONException e )
                         {
@@ -237,63 +211,66 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
-                builder1.setTitle("Reminder");
-                boolean check = false;
-
-                for(int i =0 ; i< codes.size();i++)
-                {
-                    if(codes.get(i).equals(code.getText().toString()))
-                    {
-                        check = true;
-                    }
-                }
-                    if(check)
-                    {
-                        builder1.setMessage("You've successfully joined a new group");
-                        builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                    RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                                    JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address
-                                            ,code.getText().toString(),intent,activity,userName,userid);
-                                    requestQueue.add(jsonArrayRequest1);
-                            }
-                        });
-                    }
-                    else
-                    {
-                        builder1.setMessage("Error code, the group does not exist");
-                        builder1.setPositiveButton("Cancel",null);
-                    }
-                AlertDialog dialog1=builder1.create();
-                dialog1.show();
-            }
-        });
-      builder.setNegativeButton("Cancel",null);
-        AlertDialog dialog=builder.create();
-        dialog.show();
-        return jsonArrayRequest;
+        requestQueue.add(jsonArrayRequest);
+        //return inPosition;
     }
 
-    public static JsonArrayRequest insertNewGroup(String address, String code,Intent intent
-            ,Activity activity ,String userName, String userid)
+    public void SearchGroup(String code,Positions inModel,View caller)
+    {
+        //ArrayList<String> codes = new ArrayList<String>();
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url+ "searchGroupCode/"+code, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        AlertDialog.Builder builder1=new AlertDialog.Builder(caller.getContext());
+                        builder1.setTitle("Reminder");
+                        try
+                        {
+                            if(response.getJSONObject(0).getString("code")!=code)
+                            {
+                                builder1.setMessage("You've successfully joined a new group");
+                                builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        insertNewGroup(inModel,caller,code);
+                                    }
+                                });
+                            }
+                        }
+                        catch( JSONException e )
+                        {
+                            Log.e( "Database", e.getMessage(), e );
+                            builder1.setMessage("Error code, the group does not exist");
+                            builder1.setPositiveButton("Cancel",null);
+                        }
+                        AlertDialog dialog1=builder1.create();
+                        dialog1.show();
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        error.printStackTrace();
+                    }
+                }
+        );
+        requestQueue.add(jsonArrayRequest);
+
+    }
+
+    public void insertNewGroup(Positions inModel,View caller,String code)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
-                , url+"addGroup/"+address+"/"+code, null,
+                , url+"addGroup/"+inModel.getEmail()+"/"+code, null,
                 new Response.Listener<JSONArray>()
                 {
                     @Override
                     public void onResponse(JSONArray response)
                     {
-                        RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                        JsonArrayRequest jsonArrayRequest1 = Json.LoginSuccessfully(address,userName
-                                ,intent,activity,userid);
-                        requestQueue.add(jsonArrayRequest1);
+                        LoginSuccessfully(inModel,caller);
                     }
                 },
                 new Response.ErrorListener()
@@ -305,9 +282,8 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-        return jsonArrayRequest;
+        requestQueue.add(jsonArrayRequest);
     }
-
     public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName
             ,TextView errorMessage)
     {
@@ -326,13 +302,12 @@ public class Json extends AppCompatActivity {
         return submitRequest;
     }
 
-    public static JsonArrayRequest createNewGroup(EditText groupName,String address,String userName
-            , Activity activity,Intent intent,AlertDialog.Builder builder,String id )
+    public void createNewGroup(Positions inModel, View caller)
     {
         GenerateCode generateCode = new GenerateCode(3);
         String Sendcode = generateCode.generateCode();
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url+"createGroup/"+Sendcode+"/"+
-                groupName.getText().toString()
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                , url+"createGroup/"+Sendcode+"/"
                 , null,
                 new Response.Listener<JSONArray>()
                 {
@@ -340,122 +315,73 @@ public class Json extends AppCompatActivity {
                     public void onResponse(JSONArray response)
                     {
 
-                    }
-                },
+                        AlertDialog.Builder builder=new AlertDialog.Builder(caller.getContext());
+                        EditText groupName = new EditText(caller.getContext());
+                        builder.setTitle("Create a new Group");
+                        builder.setMessage("Enter the name of the group");
+                        builder.setView(groupName);
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                AlertDialog.Builder builder1=new AlertDialog.Builder(caller.getContext());
+                                builder1.setTitle("Reminder");
+                                if(groupName.getText().toString()!= null)
+                                {
+                                    builder1.setMessage("The group \""+groupName.getText().toString()
+                                            +"\" was created successfully!\n" + "Invitation code :"+Sendcode);
+                                    SendMailUtil.send(inModel.getEmail(),Sendcode,2,groupName.getText().toString());
+                                    builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            setGroupName(Sendcode,groupName.getText().toString(),inModel,caller);
+                                        }
+                                    });
+                                }
+                                else
+                                {
+                                    builder1.setMessage("The group name cannot be blank!");
+                                    builder1.setPositiveButton("Cancel",null);
+                                }
+                                AlertDialog dialog1=builder1.create();
+                                dialog1.show();
+                            }
+                        });
+                        builder.setNegativeButton("Cancel",null);
+                        AlertDialog dialog=builder.create();
+                        dialog.show();
+                    }},
                 new Response.ErrorListener()
                 {
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
                         error.printStackTrace();
+                        Toast.makeText(caller.getContext(),"Create Group Failed.",Toast.LENGTH_SHORT).show();
                     }
                 }
         );
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                AlertDialog.Builder builder1=new AlertDialog.Builder(activity);
-                builder1.setTitle("Reminder");
-                RequestQueue requestQueue = Volley.newRequestQueue(activity);
-               // System.out.println("GroupName:::::"+groupName.getText().toString());
-                if(groupName.getText().toString()!= null)
-                {
-                    builder1.setMessage("The group \""+groupName.getText().toString()
-                            +"\" was created successfully!\n" + "Invitation code :"+Sendcode);
-                    SendMailUtil.send(address,Sendcode,2,groupName.getText().toString());
-                    builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            JsonArrayRequest jsonArrayRequest1 = Json.setGroupName(Sendcode
-                                    ,groupName.getText().toString(), address,intent,activity
-                                    ,userName,id);
-                            requestQueue.add(jsonArrayRequest1);
-                        }
-                    });
-                }
-                else
-                {
-                    builder1.setMessage("The group name cannot be blank!");
-                    builder1.setPositiveButton("Cancel",null);
-                }
-
-                AlertDialog dialog1=builder1.create();
-                dialog1.show();
-            }
-        });
-        builder.setNegativeButton("Cancel",null);
-        AlertDialog dialog=builder.create();
-        dialog.show();
-        return jsonArrayRequest;
+        requestQueue.add(jsonArrayRequest);
     }
 
-    public static JsonArrayRequest setGroupName(String code,String GroupName,String address
-            ,Intent intent,Activity activity,String userName,String id)
+    public void setGroupName(String code,String GroupName,Positions inModel,View caller)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"setGroupName/"+GroupName+"/"+code, null, null,
-                new Response.ErrorListener()
-                {
+                url + "setGroupName/" + GroupName + "/" + code, null,
+                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
+                    public void onResponse(JSONArray response) {
+                        insertNewGroup(inModel,caller,code);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
                     }
                 }
         );
-        RequestQueue requestQueue = Volley.newRequestQueue(activity);
-        JsonArrayRequest jsonArrayRequest1 = Json.insertNewGroup(address,code,intent,activity,userName,id);
-        requestQueue.add(jsonArrayRequest1);
-        return submitRequest;
+        requestQueue.add(submitRequest);
     }
-
-    /*public static JsonArrayRequest getMyPosition(String useraddress)
-    {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"getMyPosition/"+useraddress, null,
-                new Response.Listener<JSONArray>()
-                {
-                    @Override
-                    public void onResponse(JSONArray response)
-                    {
-                        try
-                        {
-                            JSONObject curObject;
-                            LatLng latLng;
-                            positionNum = response.length();
-                            for(int i = 0; i < response.length();i++){
-                                curObject = response.getJSONObject(i);
-                                latLng = new LatLng(
-                                        curObject.getDouble("Lat"),
-                                        curObject.getDouble("Lon"));
-                                Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
-                                        .title(curObject.getString("date"))
-                                        .snippet(curObject.getString("Name")));
-                                //marker.setTag(curObject.getString("idPhoto"));
-                                marker.setTag(i);
-                                if(i==response.length()-1){
-                                    currentLatitude = Double.parseDouble(curObject.getString("Lat"));
-                                    currentLongitude = Double.parseDouble(curObject.getString("Lon"));
-                                }
-                            }
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        error.getLocalizedMessage();
-                    }
-                }
-        );
-        return jsonArrayRequest;
-    }*/
 
     public Positions getMyPosition(Positions inPositions)
     {
@@ -480,9 +406,6 @@ public class Json extends AppCompatActivity {
                                     curObject.getDouble("Lon"));
                             date = curObject.getString("date");
                             name = curObject.getString("Name");
-                            /*Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
-                                    .title(curObject.getString("date"))
-                                    .snippet(curObject.getString("Name")));*/
                             Position position = new Position(latLng,date,name);
                             /*if(i==response.length()-1){
                                 currentLatitude = Double.parseDouble(curObject.getString("Lat"));
@@ -525,13 +448,6 @@ public class Json extends AppCompatActivity {
                                     date = curObject.getString("date");
                                     name = curObject.getString("Name");
                                     Position position = new Position(latLng,date,name);
-                                    //Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
-                                    //        .title(curObject.getString("date"))
-                                    //        .snippet("Recently posted by : "+curObject.getString("Name")));
-                                    //marker.setTag(curObject.getString("idPositions"));
-                                    //myLatitude.add(Double.parseDouble(curObject.getString("Lat")));
-                                    //myLongitude.add(Double.parseDouble(curObject.getString("Lon")));
-                                    //marker.setTag(i);
                                     myPositions.add(position);
                                 }
                             }
@@ -579,7 +495,6 @@ public class Json extends AppCompatActivity {
             ,RequestQueue requestQueue)
     {
         //Start an animating progress widget
-
         StringRequest submitRequest = new StringRequest (Request.Method.POST
                 , url+"addPhoto"
                 ,  new Response.Listener<String>() {
@@ -606,16 +521,16 @@ public class Json extends AppCompatActivity {
         requestQueue.add(submitRequest);
     }
 
-    public static JsonArrayRequest changePassword(String password, String emailaddress, Intent intent, AlertDialog.Builder builder, Activity activity)
+    public void changePassword(UserModel inUser)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"changePassword/"+password+"/"+emailaddress, null,
+                url+"changePassword/"+inUser.getPassword()+"/"+inUser.getAddress(), null,
                 new Response.Listener<JSONArray>()
                 {
                     @Override
                     public void onResponse(JSONArray response)
                     {
-
+                        inUser.notifyChangePassword();
                     }
                 },
                 new Response.ErrorListener()
@@ -627,14 +542,11 @@ public class Json extends AppCompatActivity {
                     }
                 }
         );
-        AlertDialog dialog3 = builder.create();
-        dialog3.show();
-        activity.startActivity(intent);
-        return jsonArrayRequest;
 
+        requestQueue.add(jsonArrayRequest);
     }
 
-    public Photos getPhoto(Photos photos)
+    public void getPhoto(Photos photos)
     {
         JsonArrayRequest jsonArrayRequest;
         if(photos.getGroupId() == 0){
@@ -666,7 +578,6 @@ public class Json extends AppCompatActivity {
                             {
                                 Log.e( "Database", e.getMessage(), e );
                             }
-
                             photos.setPhotos(myPhotos);
                         }
                     },
@@ -681,6 +592,9 @@ public class Json extends AppCompatActivity {
             );
         }
         else{
+            System.out.println(photos.getGroupId());
+            System.out.println(photos.getLatitude());
+            System.out.println(photos.getLongitude());
             jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                     url+"getGroupPhotos/"+photos.getGroupId()+"/"+photos.getLatitude()+"/"+photos.getLongitude()
                     , null,
@@ -704,12 +618,12 @@ public class Json extends AppCompatActivity {
                                     Photo photo = new Photo(name,date,photoBase);
                                     myPhotos.add(photo);
                                 }
-                                //activity.startActivity(intent);
                             }
                             catch( JSONException e )
                             {
                                 Log.e( "Database", e.getMessage(), e );
                             }
+                            photos.setPhotos(myPhotos);
                         }
                     },
                     new Response.ErrorListener()
@@ -723,6 +637,7 @@ public class Json extends AppCompatActivity {
             );
         }
         requestQueue.add(jsonArrayRequest);
-        return photos;
     }
+
+    public void setController(Context context){this.controller = context;}
 }

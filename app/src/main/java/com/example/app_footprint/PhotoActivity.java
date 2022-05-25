@@ -1,8 +1,5 @@
 package com.example.app_footprint;
 
-import static com.example.app_footprint.Json.myLatitude;
-import static com.example.app_footprint.Json.myLongitude;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
@@ -24,18 +21,18 @@ import com.example.app_footprint.module.PhotoActivityModel;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class PhotoActivity extends AppCompatActivity {
     private ImageView image;
     private RequestQueue requestQueue;
     private int PICK_IMAGE_REQUEST = 111;
-    private Bitmap bitmap;
     private Bundle extras;
-    private boolean flag = false;
-    private int i = 0;
     private PhotoActivityModel photo;
     private Json baseConnection;
+    private ArrayList<Double> myLatitude = new ArrayList<>();
+    private ArrayList<Double> myLongitude = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,14 +41,20 @@ public class PhotoActivity extends AppCompatActivity {
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
         baseConnection = new Json(requestQueue);
-
         photo = new PhotoActivityModel(extras.getString("userid"),(String)extras.get("groupId"));
+        myLatitude = (ArrayList<Double>) extras.get("myLatitude");
+        myLongitude = (ArrayList<Double>) extras.get("myLongitude");
+        for(double i : myLongitude){
+            System.out.println(i);
+        }
         selectPosition();
     }
 
     private void selectPosition() {
         double latitude = extras.getDouble("latitude");
         double longitude = extras.getDouble("longitude");
+        boolean flag = false;
+        int i = 0;
         while(flag == false && i < myLatitude.size()) {
             if (Math.abs(latitude - myLatitude.get(i)) < 0.05 &&
                     Math.abs(longitude - myLongitude.get(i)) < 0.05) {
@@ -86,7 +89,7 @@ public class PhotoActivity extends AppCompatActivity {
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri filePath = data.getData();
-
+            Bitmap bitmap;
             try {
                 //getting image from gallery
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
@@ -108,8 +111,6 @@ public class PhotoActivity extends AppCompatActivity {
         finish();
 
     }
-
-
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth) {
         int width = bm.getWidth();

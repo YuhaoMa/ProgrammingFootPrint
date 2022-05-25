@@ -4,4 +4,5 @@ import java.util.List;
 
 public interface MapsActivityNotifier {
     void setMarker(List<Position> positionList);
+    void refresh();
 }

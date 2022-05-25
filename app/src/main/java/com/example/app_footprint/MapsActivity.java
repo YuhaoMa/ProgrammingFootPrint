@@ -77,14 +77,10 @@ public class MapsActivity extends AppCompatActivity implements
     private final long MINI_DIST = 10;
     private Toolbar tToolbar;
     private Toolbar bToolbar;
-    private ArrayList<String> groupsId;
-    private ArrayList<String> groupsName;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
     private String date;
     private String userid;
-    public static String finalGroupName;
-    public  Map<String,String> groupMap = new HashMap<>();
     private static Location uploadLocation;
     public static int positionNum;
     public static double currentLatitude;
@@ -99,24 +95,16 @@ public class MapsActivity extends AppCompatActivity implements
         setContentView(binding.getRoot());
         requestQueue = Volley.newRequestQueue(this);
         baseConnection = new Json(requestQueue);
+        baseConnection.setController(MapsActivity.this);
         Bundle extras = getIntent().getExtras();
-        positionsModel = new Positions(extras.getString("address"),finalGroupName,extras.getString("userId"));
+        positionsModel = new Positions(extras.getString("address"),extras.getString("userId")
+                ,(Map<String, String>) extras.getSerializable("Positions"),extras.getString("username"));
         positionsModel.setMapsActivityNotifier(this);
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
-        UserNametext.setText((String) extras.get("username"));
+        UserNametext.setText(positionsModel.getUserName());
         //update groupmap
-        groupsName =(ArrayList<String>) extras.get("GroupName");
-        groupsId   =(ArrayList<String>) extras.get("GroupId");
-        for(int i=0;i<groupsName.size();i++)
-        {
-            groupMap.put(groupsName.get(i),groupsId.get(i));
-        }
-
         setSupportActionBar(tToolbar);
-        Date dNow = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        date = sdf.format(dNow);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         Intent intent = new Intent(this,PhotoActivity.class);
         tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -131,13 +119,21 @@ public class MapsActivity extends AppCompatActivity implements
                                     Toast.LENGTH_SHORT).show();
                     }
                     else
-                    {
+                    {   ArrayList<Double> myLatitude = new ArrayList<>();
+                        ArrayList<Double> myLongitude = new ArrayList<>();
+                        for(int i = 0 ; i < positionsModel.getMyPositions().size(); i ++)
+                        {
+                            myLatitude.add(positionsModel.getMyPositions().get(i).getLatLng().latitude);
+                            myLongitude.add(positionsModel.getMyPositions().get(i).getLatLng().longitude);
+                        }
                         intent.putExtra("address",userAddress);
                         intent.putExtra("date",date);
                         intent.putExtra("latitude",uploadLocation.getLatitude());
                         intent.putExtra("longitude",uploadLocation.getLongitude());
                         intent.putExtra("userid",userid);
-                        intent.putExtra("groupId",groupMap.get(positionsModel.getGroupName()));
+                        intent.putExtra("groupId",positionsModel.getGroupId());
+                        intent.putExtra("myLatitude",myLatitude);
+                        intent.putExtra("myLongitude",myLongitude);
                         startActivity(intent);
                     }
 
@@ -232,31 +228,32 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setTitle("Search Group");
         builder.setMessage("Please enter the code of the group you want to join");
         builder.setView(code);
-        Intent intent = new Intent(this,MapsActivity.class);
-        //requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.SearchGroup(code,builder,this,userAddress,UserNametext.getText().toString(),intent,userid));
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                baseConnection.SearchGroup(code.getText().toString(),positionsModel,view);
+                AlertDialog.Builder builder1=new AlertDialog.Builder(MapsActivity.this);
+                builder1.setTitle("Reminder");
+                }
+            });
+        builder.setNegativeButton("Cancel",null);
+        AlertDialog dialog=builder.create();
+        dialog.show();
 
     }
     public void createGroup(View view)
     {
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        EditText groupName = new EditText(this);
-        builder.setTitle("Create a new Group");
-        builder.setMessage("Enter the name of the group");
-        builder.setView(groupName);
-        Intent intent = new Intent(this,MapsActivity.class);
-        //requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(Json.createNewGroup(groupName,userAddress,UserNametext.getText().toString(),
-                this,intent,builder,userid));
+        baseConnection.createNewGroup(positionsModel,view);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maps_menu,menu);
-        for(int i =0 ; i<groupsName.size();i++)
-        {
-            menu.add(1,1,i,groupsName.get(i));
+        int i = 0;
+        for(String name: positionsModel.getGroupMap().keySet()){
+            menu.add(1,1,i,name);
+            i++;
         }
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
 
@@ -270,8 +267,8 @@ public class MapsActivity extends AppCompatActivity implements
     public boolean onMarkerClick(@NonNull Marker marker) {
         Intent intent = new Intent(this,ShowActivity.class);
         int groupid = 0;
-        if(groupMap.get(finalGroupName)==null){
-            groupid = 0;
+        if(positionsModel.getGroupName()!= null){
+            groupid = Integer.valueOf(positionsModel.getGroupId());
         }
         intent.putExtra("userid",Integer.valueOf(userid));
         intent.putExtra("groupid",groupid);
@@ -297,6 +294,11 @@ public class MapsActivity extends AppCompatActivity implements
                     .title(positionList.get(i).getDate())
                     .snippet("Recently posted by : "+positionList.get(i).getName()));
         }
+    }
+
+    @Override
+    public void refresh() {
+        System.out.println("ddd");
     }
 
 }
