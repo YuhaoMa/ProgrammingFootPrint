@@ -19,18 +19,23 @@ import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.example.app_footprint.module.Photo;
+import com.example.app_footprint.module.PhotoActivityModel;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class PhotoActivity extends AppCompatActivity {
     private ImageView image;
     private RequestQueue requestQueue;
     private int PICK_IMAGE_REQUEST = 111;
     private Bitmap bitmap;
-    private ProgressDialog progressDialog;
     private Bundle extras;
     private boolean flag = false;
     private int i = 0;
+    private PhotoActivityModel photo;
+    private Json baseConnection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,13 +43,15 @@ public class PhotoActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
+        baseConnection = new Json(requestQueue);
+
+        photo = new PhotoActivityModel(extras.getString("userid"),(String)extras.get("groupId"));
         selectPosition();
     }
 
     private void selectPosition() {
-        double latitude = (double)extras.get("latitude");
-        double longitude = (double)extras.get("longitude");
-        System.out.println(myLatitude.toString());
+        double latitude = extras.getDouble("latitude");
+        double longitude = extras.getDouble("longitude");
         while(flag == false && i < myLatitude.size()) {
             if (Math.abs(latitude - myLatitude.get(i)) < 0.05 &&
                     Math.abs(longitude - myLongitude.get(i)) < 0.05) {
@@ -52,6 +59,16 @@ public class PhotoActivity extends AppCompatActivity {
                 break;
             }
             i++;
+        }
+        if(flag)
+        {
+            photo.setLatitude(myLatitude.get(i));
+            photo.setLongitude(myLongitude.get(i));
+        }
+        else
+        {
+            photo.setLatitude(latitude);
+            photo.setLongitude(longitude);
         }
     }
 
@@ -77,6 +94,7 @@ public class PhotoActivity extends AppCompatActivity {
                 bitmap = getResizedBitmap( bitmap, 400 );
                 //Setting image to ImageView
                 image.setImageBitmap(bitmap);
+                photo.setBitmap(bitmap);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -85,28 +103,9 @@ public class PhotoActivity extends AppCompatActivity {
 
     public void onBtnPostClicked(View caller)
     {
-        //Start an animating progress widget
-            progressDialog = new ProgressDialog(PhotoActivity.this);
-            progressDialog.setMessage("Uploading, please wait...");
-            progressDialog.show();
-
-            //convert image to base64 string
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageBytes = baos.toByteArray();
-            final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-            if(flag){
-                requestQueue.add(Json.addPhotoInfo((String) extras.get("date"),(String) extras.get("userid")
-                        ,(String) extras.get("groupId"),
-                        myLatitude.get(i),myLongitude.get(i), progressDialog,this
-                        ,imageString));
-            }
-            else {
-                requestQueue.add(Json.addPhotoInfo((String) extras.get("date"), (String) extras.get("userid")
-                        , (String) extras.get("groupId"), (double) extras.get("latitude")
-                        , (double) extras.get("longitude"), progressDialog, this, imageString));
-            }
-            finish();
+        photo.setBitmapBase();
+        baseConnection.addPhotoInfo(photo,caller);
+        finish();
 
     }
 

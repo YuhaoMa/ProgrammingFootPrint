@@ -42,6 +42,9 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
+import com.example.app_footprint.module.MapsActivityNotifier;
+import com.example.app_footprint.module.Position;
+import com.example.app_footprint.module.Positions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -62,7 +65,9 @@ import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements
-        GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback, GoogleMap.OnMarkerClickListener
+        , MapsActivityNotifier
+{
     private RequestQueue requestQueue;
     private static GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -72,12 +77,10 @@ public class MapsActivity extends AppCompatActivity implements
     private final long MINI_DIST = 10;
     private Toolbar tToolbar;
     private Toolbar bToolbar;
-    private LatLng latLng;
     private ArrayList<String> groupsId;
     private ArrayList<String> groupsName;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
-    //private Bitmap bitmap;
     private String date;
     private String userid;
     public static String finalGroupName;
@@ -86,15 +89,19 @@ public class MapsActivity extends AppCompatActivity implements
     public static int positionNum;
     public static double currentLatitude;
     public static double currentLongitude;
-    private Bitmap bitmap;
     private TextView UserNametext;
+    private Positions positionsModel;
+    private Json baseConnection;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         requestQueue = Volley.newRequestQueue(this);
+        baseConnection = new Json(requestQueue);
         Bundle extras = getIntent().getExtras();
+        positionsModel = new Positions(extras.getString("address"),finalGroupName,extras.getString("userId"));
+        positionsModel.setMapsActivityNotifier(this);
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
         UserNametext.setText((String) extras.get("username"));
@@ -118,7 +125,7 @@ public class MapsActivity extends AppCompatActivity implements
             public boolean onMenuItemClick(MenuItem item) {
                 int itemId = item.getItemId();
                 if(itemId == R.id.addP){
-                    if(groupMap.get(finalGroupName)==null)
+                    if(positionsModel.getGroupName()==null)
                         {
                             Toast.makeText(MapsActivity.this,"You are not in a group",
                                     Toast.LENGTH_SHORT).show();
@@ -130,16 +137,16 @@ public class MapsActivity extends AppCompatActivity implements
                         intent.putExtra("latitude",uploadLocation.getLatitude());
                         intent.putExtra("longitude",uploadLocation.getLongitude());
                         intent.putExtra("userid",userid);
-                        intent.putExtra("groupId",groupMap.get(finalGroupName));
+                        intent.putExtra("groupId",groupMap.get(positionsModel.getGroupName()));
                         startActivity(intent);
                     }
 
                 }
                 else{
                     mMap.clear();
-                    requestQueue.add(Json.getGroupPosition(item.toString()));
-                    finalGroupName = item.toString();
-                    Toast.makeText(MapsActivity.this, "To Group "+finalGroupName
+                    positionsModel.setGroupName(item.toString());
+                    baseConnection.getMyPosition(positionsModel);
+                    Toast.makeText(MapsActivity.this, "To Group "+positionsModel.getGroupName()
                             , Toast.LENGTH_SHORT).show();
                 }
                 return true;
@@ -172,13 +179,12 @@ public class MapsActivity extends AppCompatActivity implements
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMarkerClickListener(this);
-        requestQueue.add(Json.getMyPosition(userAddress));
+        baseConnection.getMyPosition(positionsModel);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 uploadLocation = location;
-                System.out.println(uploadLocation.toString());
             }
 
             @Override
@@ -215,8 +221,8 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     public void onBtnHome_Clicked(View caller) {
-        mMap.clear();
-        requestQueue.add(Json.getMyPosition(userAddress));
+        positionsModel.setGroupName(null);
+        baseConnection.getMyPosition(positionsModel);
         Toast.makeText(this, "Return to My Homepage", Toast.LENGTH_SHORT).show();
     }
 
@@ -282,4 +288,15 @@ public class MapsActivity extends AppCompatActivity implements
     public void setUploadLocation(Location location) {
         uploadLocation = location;
     }
+
+    @Override
+    public void setMarker(List<Position> positionList) {
+        mMap.clear();
+        for(int i = 0; i < positionList.size();i++){
+           mMap.addMarker(new MarkerOptions().position(positionList.get(i).getLatLng())
+                    .title(positionList.get(i).getDate())
+                    .snippet("Recently posted by : "+positionList.get(i).getName()));
+        }
+    }
+
 }

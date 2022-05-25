@@ -25,7 +25,6 @@ public class ShowActivity extends AppCompatActivity implements ShowActivityNotif
     private SimpleAdapter simpleAdapter;
     private RequestQueue requestQueue;
     private Photos photosModel;
-    //private Bundle extras;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

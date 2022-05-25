@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 
-public class Photo {
+public class Photo{
     private String name;
     private String date;
     private Bitmap bitmap;
@@ -18,6 +18,7 @@ public class Photo {
         bitmap = BitmapFactory.decodeByteArray( imageBytes
                 , 0, imageBytes.length );
     }
+
     public String getName() {
         return name;
     }

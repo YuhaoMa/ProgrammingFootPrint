@@ -11,6 +11,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,7 +30,10 @@ import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
 import com.example.app_footprint.module.Photo;
+import com.example.app_footprint.module.PhotoActivityModel;
 import com.example.app_footprint.module.Photos;
+import com.example.app_footprint.module.Position;
+import com.example.app_footprint.module.Positions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -405,7 +409,7 @@ public class Json extends AppCompatActivity {
         return submitRequest;
     }
 
-    public static JsonArrayRequest getMyPosition(String useraddress)
+    /*public static JsonArrayRequest getMyPosition(String useraddress)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                 url+"getMyPosition/"+useraddress, null,
@@ -422,8 +426,8 @@ public class Json extends AppCompatActivity {
                             for(int i = 0; i < response.length();i++){
                                 curObject = response.getJSONObject(i);
                                 latLng = new LatLng(
-                                        Double.parseDouble(curObject.getString("Lat")),
-                                        Double.parseDouble(curObject.getString("Lon")));
+                                        curObject.getDouble("Lat"),
+                                        curObject.getDouble("Lon"));
                                 Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
                                         .title(curObject.getString("date"))
                                         .snippet(curObject.getString("Name")));
@@ -451,112 +455,131 @@ public class Json extends AppCompatActivity {
                 }
         );
         return jsonArrayRequest;
+    }*/
+
+    public Positions getMyPosition(Positions inPositions)
+    {
+        JsonArrayRequest jsonArrayRequest;
+        if(inPositions.getGroupName()==null) {
+            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                    , url + "getMyPosition/" + inPositions.getEmail(), null
+                    , new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    List<Position> myPositions = new ArrayList<>();
+                    try
+                    {
+                        JSONObject curObject;
+                        LatLng latLng;
+                        String date;
+                        String name;
+                        for(int i = 0; i < response.length();i++){
+                            curObject = response.getJSONObject(i);
+                            latLng = new LatLng(
+                                    curObject.getDouble("Lat"),
+                                    curObject.getDouble("Lon"));
+                            date = curObject.getString("date");
+                            name = curObject.getString("Name");
+                            /*Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
+                                    .title(curObject.getString("date"))
+                                    .snippet(curObject.getString("Name")));*/
+                            Position position = new Position(latLng,date,name);
+                            /*if(i==response.length()-1){
+                                currentLatitude = Double.parseDouble(curObject.getString("Lat"));
+                                currentLongitude = Double.parseDouble(curObject.getString("Lon"));
+                            }*/
+                            myPositions.add(position);
+                        }
+                    }
+                    catch( JSONException e )
+                    {
+                        Log.e( "Database", e.getMessage(), e );
+                    }
+                    inPositions.setMyPositions(myPositions);
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    error.printStackTrace();
+                }
+            });
+        }
+        else{
+            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
+                    , url + "getGroupPosition/" + inPositions.getGroupName(), null,
+                    new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            List<Position> myPositions = new ArrayList<>();
+                            try
+                            {
+                                JSONObject curObject;
+                                LatLng latLng ;
+                                String date;
+                                String name;
+                                for(int i = 0; i < response.length();i++){
+                                    curObject = response.getJSONObject(i);
+                                    latLng = new LatLng(
+                                            curObject.getDouble("Lat"),
+                                            curObject.getDouble("Lon"));
+                                    date = curObject.getString("date");
+                                    name = curObject.getString("Name");
+                                    Position position = new Position(latLng,date,name);
+                                    //Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
+                                    //        .title(curObject.getString("date"))
+                                    //        .snippet("Recently posted by : "+curObject.getString("Name")));
+                                    //marker.setTag(curObject.getString("idPositions"));
+                                    //myLatitude.add(Double.parseDouble(curObject.getString("Lat")));
+                                    //myLongitude.add(Double.parseDouble(curObject.getString("Lon")));
+                                    //marker.setTag(i);
+                                    myPositions.add(position);
+                                }
+                            }
+                            catch( JSONException e )
+                            {
+                                Log.e( "Database", e.getMessage(), e );
+                            }
+                            inPositions.setMyPositions(myPositions);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+        }
+        requestQueue.add(jsonArrayRequest);
+        return inPositions;
     }
 
-    public static JsonArrayRequest newPosition(String lat,String log, String date,String userid,String groupId)
+    public void addPhotoInfo(PhotoActivityModel inmodel,View caller)
     {
+        ProgressDialog progressDialog = new ProgressDialog(caller.getContext());
+        progressDialog.setMessage("Uploading, please wait...");
+        progressDialog.show();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url + "newPosition/" + date + "/" + userid+ "/" + groupId + "/" + lat+"/"+log
-                , null,
-                new Response.Listener<JSONArray>() {
+                url + "addPhotoInfo/" + inmodel.getDate() + "/" + inmodel.getUserid() + "/" + inmodel.getGroupId() + "/" +
+                        inmodel.getLatitude() + "/" + inmodel.getLongitude()
+                , null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                LatLng latLng = new LatLng(Double.parseDouble(lat),Double.parseDouble(log));
-                Marker marker=getmMap().addMarker(new MarkerOptions().position(latLng)
-                        .title(date)
-                        .snippet(userid));
-                marker.setTag(positionNum);
-                positionNum += 1;
+                RequestQueue requestQueue = Volley.newRequestQueue(caller.getContext());
+                addPhoto(inmodel.getBitmapBase(),caller,progressDialog,requestQueue);
             }
-        },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.getLocalizedMessage();
-                    }
-                }
-        );
-        return jsonArrayRequest;
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+        requestQueue.add(jsonArrayRequest);
     }
 
-    public static JsonArrayRequest getGroupPosition(String groupname)
+    private void addPhoto(String imageString,View caller,ProgressDialog progressDialog
+            ,RequestQueue requestQueue)
     {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"getGroupPosition/"+groupname
-                , null,
-                new Response.Listener<JSONArray>()
-                {
-                    @Override
-                    public void onResponse(JSONArray response)
-                    {
-                        try
-                        {
-                            JSONObject curObject;
-                            LatLng latLng ;
-                            myLatitude.clear();
-                            myLongitude.clear();
-                            for(int i = 0; i < response.length();i++){
-                                curObject = response.getJSONObject(i);
-                                latLng = new LatLng(
-                                        Double.parseDouble(curObject.getString("Lat")),
-                                        Double.parseDouble(curObject.getString("Lon")));
-                                Marker marker = getmMap().addMarker(new MarkerOptions().position(latLng)
-                                        .title(curObject.getString("date"))
-                                        .snippet("Recently posted by : "+curObject.getString("Name")));
-                                //marker.setTag(curObject.getString("idPositions"));
-                                myLatitude.add(Double.parseDouble(curObject.getString("Lat")));
-                                myLongitude.add(Double.parseDouble(curObject.getString("Lon")));
-                                marker.setTag(i);
-                            }
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        error.getLocalizedMessage();
-                    }
-                }
-        );
-        return jsonArrayRequest;
-    }
+        //Start an animating progress widget
 
-    public static JsonArrayRequest addPhotoInfo(String date, String uId
-            , String gId, double lat,double lon ,ProgressDialog progressDialog, Activity activity
-            , String imageString)
-    {
-
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url + "addPhotoInfo/" +date  + "/" + uId + "/" + gId + "/" +
-                        String.valueOf(lat)+"/"+String.valueOf(lon)
-                , null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        RequestQueue requestQueue = Volley.newRequestQueue(activity);
-                        StringRequest submitRequest = Json.addPhoto(progressDialog,activity,imageString);
-                        requestQueue.add(submitRequest);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.getLocalizedMessage();
-                    }
-                }
-        );
-        return jsonArrayRequest;
-    }
-
-    public static StringRequest addPhoto(ProgressDialog progressDialog,Activity activity
-            ,String imageString)
-    {
         StringRequest submitRequest = new StringRequest (Request.Method.POST
                 , url+"addPhoto"
                 ,  new Response.Listener<String>() {
@@ -564,12 +587,13 @@ public class Json extends AppCompatActivity {
             public void onResponse(String response) {
                 //Turn the progress widget off
                 progressDialog.dismiss();
-                Toast.makeText(activity, "Post request executed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(caller.getContext(), "Post request executed", Toast.LENGTH_SHORT).show();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(activity, "Post request failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(caller.getContext(), "Post request failed", Toast.LENGTH_LONG).show();
+                progressDialog.dismiss();
             }
         }) { //NOTE THIS PART: here we are passing the parameter to the webservice, NOT in the URL!
             @Override
@@ -579,100 +603,8 @@ public class Json extends AppCompatActivity {
                 return params;
             }
         };
-        return submitRequest;
+        requestQueue.add(submitRequest);
     }
-
-    /*public static JsonArrayRequest getPhoto(String userid, String groupid,double lat,double lon, Intent intent
-            , Activity activity)
-    {
-        JsonArrayRequest jsonArrayRequest;
-        clearData();
-        if(groupid==null){
-            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                    url+"getMyPhoto/"+userid+"/"+lat+"/"+lon
-                    , null,
-                    new Response.Listener<JSONArray>()
-                    {
-                        @Override
-                        public void onResponse(JSONArray response)
-                        {
-                            try
-                            {
-                                JSONObject curObject = new JSONObject();
-                                String photoBase;
-                                Bitmap bitmap;
-                                for(int i = 0; i < response.length();i++){
-                                    curObject = response.getJSONObject(i);
-                                    photoBase = curObject.getString("PhotoBase");
-                                    byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
-                                    bitmap = BitmapFactory.decodeByteArray( imageBytes
-                                            , 0, imageBytes.length );
-                                    setData(bitmap,curObject.getString("date")
-                                            ,curObject.getString("Name"));
-                                }
-                                activity.startActivity(intent);
-                            }
-                            catch( JSONException e )
-                            {
-                                Log.e( "Database", e.getMessage(), e );
-                            }
-                        }
-                    },
-                    new Response.ErrorListener()
-                    {
-                        @Override
-                        public void onErrorResponse(VolleyError error)
-                        {
-                            error.getLocalizedMessage();
-                        }
-                    }
-            );
-        }
-        else{
-            jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                    url+"getGroupPhotos/"+groupid+"/"+lat+"/"+lon
-                    , null,
-                    new Response.Listener<JSONArray>()
-                    {
-                        @Override
-                        public void onResponse(JSONArray response)
-                        {
-                            try
-                            {
-                                JSONObject curObject = new JSONObject();
-                                String photoBase;
-                                Bitmap bitmap;
-                                for(int i = 0; i < response.length();i++){
-                                    curObject = response.getJSONObject(i);
-                                    photoBase = curObject.getString("PhotoBase");
-                                    byte[] imageBytes = Base64.decode( photoBase, Base64.DEFAULT );
-                                    bitmap = BitmapFactory.decodeByteArray( imageBytes
-                                            , 0, imageBytes.length );
-                                    setData(bitmap,curObject.getString("date")
-                                            ,curObject.getString("Name"));
-                                }
-                                activity.startActivity(intent);
-                            }
-                            catch( JSONException e )
-                            {
-                                Log.e( "Database", e.getMessage(), e );
-                            }
-                        }
-                    },
-                    new Response.ErrorListener()
-                    {
-                        @Override
-                        public void onErrorResponse(VolleyError error)
-                        {
-                            error.getLocalizedMessage();
-                        }
-                    }
-            );
-
-        }
-        return jsonArrayRequest;
-
-    }*/
 
     public static JsonArrayRequest changePassword(String password, String emailaddress, Intent intent, AlertDialog.Builder builder, Activity activity)
     {
