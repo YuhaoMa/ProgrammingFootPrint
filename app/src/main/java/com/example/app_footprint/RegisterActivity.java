@@ -31,9 +31,6 @@ import javax.mail.Session;
 
 
 public class RegisterActivity extends AppCompatActivity {
-    private Button btnConfirm;
-    private Button btnCancel;
-    private Button btnSendEmail;
     private TextView emailAddress;
     private TextView password;
     private TextView repeatPassword;
@@ -47,9 +44,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        btnConfirm = (Button) findViewById(R.id.btn_Confirm);
-        btnCancel = (Button) findViewById(R.id.btn_cancel);
-        btnSendEmail = (Button) findViewById(R.id.btn_sendEmail);
         emailAddress = (TextView) findViewById(R.id.text_emailAddress);
         password = (TextView) findViewById(R.id.text_password);
         repeatPassword = (TextView) findViewById(R.id.text_repeatPassword);
@@ -71,7 +65,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
         else{
             GenerateCode generateCode = new GenerateCode(8);
-             Sendcode = generateCode.generateCode();
+            Sendcode = generateCode.generateCode();
             SendMailUtil.send(textEmail,Sendcode,1,null);
         }
     }
@@ -96,12 +90,11 @@ public class RegisterActivity extends AppCompatActivity {
             }
             else{
                 requestQueue = Volley.newRequestQueue(this);
-                JsonArrayRequest submitRequest = Json.newUser(textPassword,textEmail,
-                        textName,errorMessage);
-                 requestQueue.add(submitRequest);
+                Json baseConnect = new Json(requestQueue);
+                baseConnect.newUser(textPassword,textEmail,textName,Caller);
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
-
+                finish();
             }
         }
 

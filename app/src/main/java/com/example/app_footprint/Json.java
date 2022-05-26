@@ -284,22 +284,25 @@ public class Json extends AppCompatActivity {
         );
         requestQueue.add(jsonArrayRequest);
     }
-    public static JsonArrayRequest newUser(String textPassword,String textEmail,String textName
-            ,TextView errorMessage)
+
+    public void newUser(String textPassword,String textEmail,String textName
+            ,View caller)
     {
         JsonArrayRequest submitRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"newUser/"+textPassword+"/"+textEmail+"/"+textName,
-                null,null,
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        error.printStackTrace();
-                    }
-                }
-        );
-        return submitRequest;
+                url + "newUser/" + textPassword + "/" + textEmail + "/" + textName,
+                null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                Toast.makeText(caller.getContext(),"Register Successfully",Toast.LENGTH_SHORT).show();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Toast.makeText(caller.getContext(),"Register Failed",Toast.LENGTH_SHORT).show();
+            }
+        });
+        requestQueue.add(submitRequest);
     }
 
     public void createNewGroup(Positions inModel, View caller)

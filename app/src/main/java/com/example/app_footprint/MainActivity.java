@@ -9,22 +9,29 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.example.app_footprint.module.MainActivityNotifier;
+import com.example.app_footprint.module.Positions;
+import com.example.app_footprint.module.UserModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityNotifier {
     private EditText email;
     private TextView passwd;
     private RequestQueue requestQueue;
     private TextView sees;
     private static ArrayList<ArrayList<String>> UserData;
     private static boolean check = false;
-    private  String username;
+    private Positions positions;
     private  String address;
-   private static ArrayList<String> GroupInfo;
+    private UserModel userModel;
+    private Json baseConnect;
+    //private static ArrayList<String> GroupInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,19 +40,29 @@ public class MainActivity extends AppCompatActivity {
         passwd = (TextView) findViewById(R.id.editTextTextPassword);
         sees = (TextView) findViewById((R.id.error_message));
         requestQueue = Volley.newRequestQueue(this);
+        baseConnect = new Json(requestQueue);
+        userModel = new UserModel();
+        userModel.setMainActivityNotifier(this);
     }
 
     public void onBtnLogin_Clicker(View caller) {
-        requestQueue = Volley.newRequestQueue(this);
+
         String user = email.getText().toString();
         String password = passwd.getText().toString();
-        Intent intent = new Intent(this, MapsActivity.class);
-        requestQueue.add(Json.getUserInfo(user,password,sees,intent,this));
+        if(user.equals("") || password.equals(""))
+        {
+            Toast.makeText(this,"The information is incomplete.",Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            userModel.setAddress(user);
+            userModel.setPassword(password);
+            baseConnect.getUserInfo(userModel,sees);
+        }
     }
 
 
     public void onBtnRegister_Clicker(View Caller) {
-        //Intent intent = new Intent(this, RegisterActivity.class);
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
@@ -67,7 +84,8 @@ public class MainActivity extends AppCompatActivity {
                     dialog1.show();
                 }
                 else{
-                    requestQueue.add(Json.forgetMyPassword(emailaddress,builder1,MainActivity.this));
+                    userModel.setAddress(address);
+                    baseConnect.forgetMyPassword(userModel);
                 }
 
             }
@@ -83,11 +101,92 @@ public class MainActivity extends AppCompatActivity {
         UserData = User;
     }
 
-
-    public  String getUsername() {
-        return username;
-    }
     public void setEmail(String Emailaddress){ address = Emailaddress;}
-    public void setUsername(String name){username = name;}
 
+    @Override
+    public void jumpToMap() {
+        System.out.println(userModel.getAddress());
+        System.out.println("!!!!!!!!");
+        System.out.println(userModel.getEmail());
+        baseConnect.LoginSuccessfully(userModel);
+        sees.setText("");
+    }
+
+    @Override
+    public void setWarningView(String SendCode) {
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+        builder1.setMessage("Enter the Verification Code ");
+        EditText textCode = new EditText(this);
+        builder1.setView(textCode);
+        builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(textCode.getText().toString().equals(SendCode)){
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
+                    builder2.setMessage("Enter the new Password ");
+                    EditText textPassword = new EditText(MainActivity.this);
+                    builder2.setView(textPassword);
+                    builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if(textPassword.getText().toString()  != "")
+                            {
+                                userModel.setPassword(textPassword.getText().toString());
+                                AlertDialog.Builder builder3 = new AlertDialog.Builder(MainActivity.this);
+                                builder3.setMessage("Set Successfully ");
+                                builder3.setPositiveButton("OK", null);
+                                AlertDialog dialog3 = builder3.create();
+                                dialog3.show();
+                                baseConnect.changePassword(userModel);
+                            }
+                            else
+                            {
+                                AlertDialog.Builder builder3 = new AlertDialog.Builder(MainActivity.this);
+                                builder3.setMessage("Password can't be empty.");
+                                builder3.setPositiveButton("OK", null);
+                                AlertDialog dialog3 = builder3.create();
+                                dialog3.show();
+                            }
+                        }
+
+                    });
+                    AlertDialog dialog2 = builder2.create();
+                    dialog2.show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Incorrect Code", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        AlertDialog dialog1 = builder1.create();
+        dialog1.show();
+    }
+
+    @Override
+    public void setResetSuccessfully() {
+        Intent intent = new Intent(this,MapsActivity.class);
+        baseConnect.LoginSuccessfully(userModel);
+        startActivity(intent);
+    }
+
+    @Override
+    public void setErrorView() {
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+        builder1.setMessage("User doesn't exist!");
+        builder1.setPositiveButton("Close",null);
+        AlertDialog dialog1 = builder1.create();
+        dialog1.show();
+    }
+
+    @Override
+    public void parsePositions() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        Toast.makeText(this, "Login Successfully", Toast.LENGTH_SHORT).show();
+        intent.putExtra("Positions",(Serializable) userModel.getGroupMap());
+        intent.putExtra("username",userModel.getUserName());
+        intent.putExtra("address",userModel.getAddress());
+        intent.putExtra("userId",userModel.getUserId());
+        startActivity(intent);
+    }
 }
