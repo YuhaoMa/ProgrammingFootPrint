@@ -1,12 +1,5 @@
 package com.example.app_footprint;
 
-import static com.example.app_footprint.MapsActivity.currentLatitude;
-import static com.example.app_footprint.MapsActivity.currentLongitude;
-import static com.example.app_footprint.MapsActivity.getmMap;
-import static com.example.app_footprint.MapsActivity.positionNum;
-
-
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,8 +23,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
-import com.example.app_footprint.module.AbstractPositions;
-import com.example.app_footprint.module.MainAndMap;
 import com.example.app_footprint.module.Photo;
 import com.example.app_footprint.module.PhotoActivityModel;
 import com.example.app_footprint.module.Photos;
@@ -39,8 +30,6 @@ import com.example.app_footprint.module.Position;
 import com.example.app_footprint.module.Positions;
 import com.example.app_footprint.module.UserModel;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,8 +46,9 @@ public class Json extends AppCompatActivity {
     private RequestQueue requestQueue;
     private Context controller;
 
-    public Json(RequestQueue requestQueue){
+    public Json(RequestQueue requestQueue,Context context){
         this.requestQueue = requestQueue;
+        controller = context;
     }
 
     public void getUserInfo(UserModel inUser,TextView textView)
@@ -181,11 +171,7 @@ public class Json extends AppCompatActivity {
                                 JSONObject curObject = response.getJSONObject( i );
                                 groupid = curObject.getString("idGroup");
                                 groupName = curObject.getString("GroupName");
-                                System.out.println("rwerwerqerq");
                                 tempGroupMap.put(groupName,groupid);
-                            }
-                            for(int i = 0 ; i < tempGroupMap.size();i++){
-                                System.out.println("!!!!!!!");
                             }
                             inModel.setGroupMap(tempGroupMap);
                             Intent intent = new Intent(controller, MapsActivity.class);
@@ -483,7 +469,7 @@ public class Json extends AppCompatActivity {
             @Override
             public void onResponse(JSONArray response) {
                 RequestQueue requestQueue = Volley.newRequestQueue(caller.getContext());
-                addPhoto(inmodel.getBitmapBase(),caller,progressDialog,requestQueue);
+                addPhoto(inmodel.getBitmapBase(),progressDialog,requestQueue,inmodel);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -494,8 +480,8 @@ public class Json extends AppCompatActivity {
         requestQueue.add(jsonArrayRequest);
     }
 
-    private void addPhoto(String imageString,View caller,ProgressDialog progressDialog
-            ,RequestQueue requestQueue)
+    private void addPhoto(String imageString,ProgressDialog progressDialog
+            ,RequestQueue requestQueue,PhotoActivityModel inmodel)
     {
         //Start an animating progress widget
         StringRequest submitRequest = new StringRequest (Request.Method.POST
@@ -505,14 +491,19 @@ public class Json extends AppCompatActivity {
             public void onResponse(String response) {
                 //Turn the progress widget off
                 progressDialog.dismiss();
-                Toast.makeText(caller.getContext(), "Post request executed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(controller, "Post request executed", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(controller,ShowActivity.class);
+                intent.putExtra("userid",Integer.valueOf(inmodel.getUserid()));
+                intent.putExtra("groupid",Integer.valueOf(inmodel.getGroupId()));
+                intent.putExtra("latitude",inmodel.getLatitude());
+                intent.putExtra("longitude",inmodel.getLongitude());
+                controller.startActivity(intent);
+
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(caller.getContext(), "Post request failed", Toast.LENGTH_LONG).show();
-                progressDialog.dismiss();
-            }
+        },
+                error -> {
+            Toast.makeText(controller, "Post request failed", Toast.LENGTH_LONG).show();
+            progressDialog.dismiss();
         }) { //NOTE THIS PART: here we are passing the parameter to the webservice, NOT in the URL!
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {

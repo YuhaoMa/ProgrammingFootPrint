@@ -69,7 +69,7 @@ public class MapsActivity extends AppCompatActivity implements
         , MapsActivityNotifier
 {
     private RequestQueue requestQueue;
-    private static GoogleMap mMap;
+    private GoogleMap mMap;
     private ActivityMapsBinding binding;
     private LocationListener locationListener;
     private LocationManager locationManager;
@@ -82,9 +82,6 @@ public class MapsActivity extends AppCompatActivity implements
     private String date;
     private String userid;
     private static Location uploadLocation;
-    public static int positionNum;
-    public static double currentLatitude;
-    public static double currentLongitude;
     private TextView UserNametext;
     private Positions positionsModel;
     private Json baseConnection;
@@ -94,7 +91,7 @@ public class MapsActivity extends AppCompatActivity implements
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         requestQueue = Volley.newRequestQueue(this);
-        baseConnection = new Json(requestQueue);
+        baseConnection = new Json(requestQueue,this);
         baseConnection.setController(MapsActivity.this);
         Bundle extras = getIntent().getExtras();
         positionsModel = new Positions(extras.getString("address"),extras.getString("userId")
@@ -256,13 +253,6 @@ public class MapsActivity extends AppCompatActivity implements
         return true;
     }
 
-
-
-    public static GoogleMap getmMap() {
-        return mMap;
-    }
-
-
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Intent intent = new Intent(this,ShowActivity.class);
@@ -276,14 +266,6 @@ public class MapsActivity extends AppCompatActivity implements
         intent.putExtra("longitude",marker.getPosition().longitude);
         startActivity(intent);
         return false;
-    }
-
-    public Location getUploadLocation() {
-        return uploadLocation;
-    }
-
-    public void setUploadLocation(Location location) {
-        uploadLocation = location;
     }
 
     @Override
@@ -301,4 +283,12 @@ public class MapsActivity extends AppCompatActivity implements
         System.out.println("ddd");
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(positionsModel.getGroupId() != null)
+        {
+            baseConnection.getMyPosition(positionsModel);
+        }
+    }
 }

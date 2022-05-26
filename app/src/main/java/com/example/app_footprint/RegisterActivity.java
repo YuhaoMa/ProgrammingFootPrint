@@ -90,7 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
             else{
                 requestQueue = Volley.newRequestQueue(this);
-                Json baseConnect = new Json(requestQueue);
+                Json baseConnect = new Json(requestQueue,this);
                 baseConnect.newUser(textPassword,textEmail,textName,Caller);
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);

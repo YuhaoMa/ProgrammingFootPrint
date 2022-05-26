@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
         passwd = (TextView) findViewById(R.id.editTextTextPassword);
         sees = (TextView) findViewById((R.id.error_message));
         requestQueue = Volley.newRequestQueue(this);
-        baseConnect = new Json(requestQueue);
+        baseConnect = new Json(requestQueue,this);
         userModel = new UserModel();
         userModel.setMainActivityNotifier(this);
     }

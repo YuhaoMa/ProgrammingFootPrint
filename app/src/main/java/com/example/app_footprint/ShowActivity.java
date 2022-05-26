@@ -34,7 +34,7 @@ public class ShowActivity extends AppCompatActivity implements ShowActivityNotif
         photosModel = new Photos(extras.getInt("groupid"),extras.getInt("userid")
                 ,extras.getDouble("latitude"),extras.getDouble("longitude"));
         photosModel.setShowActivityNotifier(this);
-        Json baseConnection = new Json(requestQueue);
+        Json baseConnection = new Json(requestQueue,this);
         baseConnection.getPhoto(photosModel);
     }
 

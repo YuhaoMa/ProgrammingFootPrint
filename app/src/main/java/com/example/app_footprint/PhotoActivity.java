@@ -40,7 +40,7 @@ public class PhotoActivity extends AppCompatActivity {
         extras = getIntent().getExtras();
         image = (ImageView)findViewById(R.id.img_choose);
         requestQueue = Volley.newRequestQueue(this);
-        baseConnection = new Json(requestQueue);
+        baseConnection = new Json(requestQueue,this);
         photo = new PhotoActivityModel(extras.getString("userid"),(String)extras.get("groupId"));
         myLatitude = (ArrayList<Double>) extras.get("myLatitude");
         myLongitude = (ArrayList<Double>) extras.get("myLongitude");
@@ -109,7 +109,6 @@ public class PhotoActivity extends AppCompatActivity {
         photo.setBitmapBase();
         baseConnection.addPhotoInfo(photo,caller);
         finish();
-
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth) {
@@ -130,6 +129,5 @@ public class PhotoActivity extends AppCompatActivity {
 
     public void onClick_close(View caller){
         finish();
-        //requestQueue.add(Json.showPhoto());
     }
 }
