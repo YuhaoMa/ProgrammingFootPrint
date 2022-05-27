@@ -3,55 +3,38 @@ package com.example.app_footprint;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.app_footprint.Email.GenerateCode;
-import com.example.app_footprint.Email.SendMailUtil;
 import com.example.app_footprint.module.MapsActivityNotifier;
 import com.example.app_footprint.module.Position;
 import com.example.app_footprint.module.Positions;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.app_footprint.databinding.ActivityMapsBinding;
@@ -61,9 +44,6 @@ import java.security.acl.Group;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,7 +61,6 @@ public class MapsActivity extends AppCompatActivity implements
     private Toolbar bToolbar;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
-    private String date;
     private String userid;
     private static Location uploadLocation;
     private TextView UserNametext;
@@ -100,13 +79,13 @@ public class MapsActivity extends AppCompatActivity implements
         positionsModel = new Positions(extras.getString("address"), extras.getString("userId")
                 , (Map<String, String>) extras.getSerializable("Positions"), extras.getString("username"));
         positionsModel.setMapsActivityNotifier(this);
-        tToolbar = (Toolbar) findViewById(R.id.toolbar);
+        tToolbar = findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
         UserNametext.setText(positionsModel.getUserName());
         //update groupmap
         setSupportActionBar(tToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        Intent intent = new Intent(this, PhotoActivity.class);
+        Intent intent = new Intent(this,PhotoActivity.class);
         tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
 
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -129,7 +108,6 @@ public class MapsActivity extends AppCompatActivity implements
 
 
                         intent.putExtra("address", userAddress);
-                        intent.putExtra("date", date);
                         intent.putExtra("latitude", uploadLocation.getLatitude());
                         intent.putExtra("longitude", uploadLocation.getLongitude());
                         intent.putExtra("userid", userid);
@@ -143,14 +121,14 @@ public class MapsActivity extends AppCompatActivity implements
                     mMap.clear();
                     positionsModel.setGroupName(item.toString());
                     baseConnection.getMyPosition(positionsModel);
-                    Toast.makeText(MapsActivity.this, "To Group " + positionsModel.getGroupName()
+                    Toast.makeText(MapsActivity.this, "To Group "+positionsModel.getGroupName()
                             , Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
 
         });
-        bToolbar = (Toolbar) findViewById(R.id.toolbar3);
+        bToolbar = findViewById(R.id.toolbar3);
         userAddress = (String) extras.get("address");
         userid = (String) extras.get("userId");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -192,7 +170,8 @@ public class MapsActivity extends AppCompatActivity implements
 
             @Override
             public void onProviderDisabled(@NonNull String provider) {
-
+                Toast.makeText(MapsActivity.this,"GPS is turned off.",Toast.LENGTH_SHORT).show();
+                finish();
             }
 
             @Override

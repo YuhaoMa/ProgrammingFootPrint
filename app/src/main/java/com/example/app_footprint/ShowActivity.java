@@ -58,6 +58,7 @@ public class ShowActivity extends AppCompatActivity implements ShowActivityNotif
         photosList.forEach(System.out::println);
 
         gridView = (GridView) findViewById(R.id.view_photo);
+        gridView = findViewById(R.id.view_photo);
         List<Map<String,Object>> data = new ArrayList<Map<String, Object>>();
 
         //Lambda

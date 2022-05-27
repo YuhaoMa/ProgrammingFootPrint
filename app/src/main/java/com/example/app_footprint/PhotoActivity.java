@@ -2,27 +2,20 @@ package com.example.app_footprint;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-import com.example.app_footprint.module.Photo;
 import com.example.app_footprint.module.PhotoActivityModel;
 
-import java.io.ByteArrayOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class PhotoActivity extends AppCompatActivity {
     private ImageView image;
@@ -55,7 +48,7 @@ public class PhotoActivity extends AppCompatActivity {
         double longitude = extras.getDouble("longitude");
         boolean flag = false;
         int i = 0;
-        while(flag == false && i < myLatitude.size()) {
+        while(i < myLatitude.size()) {
             if (Math.abs(latitude - myLatitude.get(i)) < 0.05 &&
                     Math.abs(longitude - myLongitude.get(i)) < 0.05) {
                 flag = true;

@@ -32,14 +32,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
     private  String address;
     private UserModel userModel;
     private Json baseConnect;
-    //private static ArrayList<String> GroupInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         email = findViewById(R.id.txtName);
-        passwd = (TextView) findViewById(R.id.editTextTextPassword);
-        sees = (TextView) findViewById((R.id.error_message));
+        passwd = findViewById(R.id.editTextTextPassword);
+        sees = findViewById((R.id.error_message));
         requestQueue = Volley.newRequestQueue(this);
         baseConnect = new Json(requestQueue,this);
         userModel = new UserModel();
@@ -96,21 +95,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    public static void setCheck(boolean x) {
-        check = x;
-    }
-
-    public static void setUserData(ArrayList<ArrayList<String>> User) {
-        UserData = User;
-    }
 
     public void setEmail(String Emailaddress){ address = Emailaddress;}
 
     @Override
     public void jumpToMap() {
-        System.out.println(userModel.getEmail());
-        System.out.println("!!!!!!!!");
-        System.out.println(userModel.getEmail());
         baseConnect.LoginSuccessfully(userModel);
         sees.setText("");
     }
@@ -137,7 +126,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
                                 userModel.setPassword(textPassword.getText().toString());
                                 AlertDialog.Builder builder3 = new AlertDialog.Builder(MainActivity.this);
                                 builder3.setMessage("Set Successfully ");
-                                builder3.setPositiveButton("OK", null);
+                                builder3.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        setResetSuccessfully();
+                                    }
+                                });
                                 AlertDialog dialog3 = builder3.create();
                                 dialog3.show();
                                 baseConnect.changePassword(userModel);
@@ -168,9 +162,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
 
     @Override
     public void setResetSuccessfully() {
-        Intent intent = new Intent(this,MapsActivity.class);
         baseConnect.LoginSuccessfully(userModel);
-        startActivity(intent);
     }
 
     @Override

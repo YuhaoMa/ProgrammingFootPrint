@@ -436,7 +436,7 @@ public class Json extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
-                        error.getLocalizedMessage();
+                        error.printStackTrace();
                     }
                 }
         );

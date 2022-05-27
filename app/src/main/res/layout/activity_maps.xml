@@ -48,24 +48,24 @@
         android:id="@+id/HomeBtn"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginStart="16dp"
         android:background="?attr/colorPrimary"
         android:onClick="onBtnHome_Clicked"
         android:src="@drawable/ic_home_black_24dp"
         app:layout_constraintBottom_toBottomOf="@id/toolbar3"
-        app:layout_constraintStart_toStartOf="@+id/toolbar3"
+        app:layout_constraintEnd_toStartOf="@+id/AddBtn"
+        app:layout_constraintStart_toEndOf="@+id/SearchBtn"
         app:layout_constraintTop_toTopOf="@+id/toolbar3" />
 
     <ImageButton
         android:id="@+id/SearchBtn"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginStart="16dp"
         android:background="?attr/colorPrimary"
         android:onClick="searchGroup"
         android:src="@android:drawable/ic_menu_search"
         app:layout_constraintBottom_toBottomOf="@id/toolbar3"
-        app:layout_constraintEnd_toStartOf="@+id/AddBtn"
-        app:layout_constraintStart_toEndOf="@+id/HomeBtn"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/toolbar3" />
 
     <ImageButton
@@ -84,6 +84,7 @@
         android:id="@+id/imageView"
         android:layout_width="46dp"
         android:layout_height="0dp"
+        android:layout_marginStart="8dp"
         android:src="@android:drawable/ic_dialog_map"
         app:layout_constraintBottom_toTopOf="@+id/map"
         app:layout_constraintStart_toStartOf="parent"
@@ -93,6 +94,8 @@
         android:id="@+id/textView9"
         android:layout_width="158dp"
         android:layout_height="42dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="TextView"
         android:textSize="24sp"
         android:textStyle="bold"
