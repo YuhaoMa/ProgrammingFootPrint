@@ -105,6 +105,7 @@ public class Json extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
                     }
                 });
         requestQueue.add(jsonArrayRequest);
@@ -141,7 +142,6 @@ public class Json extends AppCompatActivity {
 
     public void SearchGroup(String code,Positions inModel,View caller)
     {
-        //ArrayList<String> codes = new ArrayList<String>();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
                 , url+ "searchGroupCode/"+code, null,
                 new Response.Listener<JSONArray>() {
@@ -151,7 +151,7 @@ public class Json extends AppCompatActivity {
                         builder1.setTitle("Reminder");
                         try
                         {
-                            if(response.getJSONObject(0).getString("code")!=code)
+                            if(response.getJSONObject(0).getString("code").equals(code))
                             {
                                 builder1.setMessage("You've successfully joined a new group");
                                 builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -252,7 +252,7 @@ public class Json extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 AlertDialog.Builder builder1=new AlertDialog.Builder(caller.getContext());
                                 builder1.setTitle("Reminder");
-                                if(groupName.getText().toString()!= null)
+                                if(!groupName.getText().toString().equals(""))
                                 {
                                     builder1.setMessage("The group \""+groupName.getText().toString()
                                             +"\" was created successfully!\n" + "Invitation code :"+Sendcode);
@@ -273,7 +273,12 @@ public class Json extends AppCompatActivity {
                                 dialog1.show();
                             }
                         });
-                        builder.setNegativeButton("Cancel",null);
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteGroup();
+                            }
+                        });
                         AlertDialog dialog=builder.create();
                         dialog.show();
                     }},
@@ -477,9 +482,6 @@ public class Json extends AppCompatActivity {
             );
         }
         else{
-            System.out.println(photos.getGroupId());
-            System.out.println(photos.getLatitude());
-            System.out.println(photos.getLongitude());
             jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                     url+"getGroupPhotos/"+photos.getGroupId()+"/"+photos.getLatitude()+"/"+photos.getLongitude()
                     , null,
@@ -508,6 +510,22 @@ public class Json extends AppCompatActivity {
                     }
             );
         }
+        requestQueue.add(jsonArrayRequest);
+    }
+
+    private void deleteGroup()
+    {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                url+"deletGroup", null, null,
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        error.printStackTrace();
+                    }
+                }
+        );
         requestQueue.add(jsonArrayRequest);
     }
 
@@ -543,7 +561,7 @@ public class Json extends AppCompatActivity {
             }
         return myPositions;
     }
-    private  List<Photo>         setPhoto(JSONArray jsonArray) throws JSONException {
+    private  List<Photo> setPhoto(JSONArray jsonArray) throws JSONException {
         List<Photo> myPhotos = new ArrayList<>();
         JSONObject curObject = new JSONObject();
         String photoBase;
@@ -559,4 +577,5 @@ public class Json extends AppCompatActivity {
         }
         return myPhotos;
     }
+
 }

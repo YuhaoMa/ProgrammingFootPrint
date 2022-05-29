@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -27,6 +28,7 @@ public class ShowActivity extends AppCompatActivity implements ShowActivityNotif
     private SimpleAdapter simpleAdapter;
     private RequestQueue requestQueue;
     private Photos photosModel;
+    private TextView showGroupName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +40,8 @@ public class ShowActivity extends AppCompatActivity implements ShowActivityNotif
         photosModel.setShowActivityNotifier(this);
         Json baseConnection = new Json(requestQueue,this);
         baseConnection.getPhoto(photosModel);
+        showGroupName = findViewById(R.id.txt_groupName);
+        showGroupName.setText(extras.getString("groupName"));
     }
 
     private void setData(Bitmap bitmap, String date,String name,List<Map<String,Object>> data) {

@@ -13,10 +13,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
+import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -49,16 +50,13 @@ import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback, GoogleMap.OnMarkerClickListener
-        , MapsActivityNotifier {
+        , MapsActivityNotifier
+{
     private RequestQueue requestQueue;
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
-    private LocationListener locationListener;
-    private LocationManager locationManager;
     private final long MINI_TIME = 1000;
     private final long MINI_DIST = 10;
-    private Toolbar tToolbar;
-    private Toolbar bToolbar;
     private int PICK_IMAGE_REQUEST = 111;
     private String userAddress;
     private String userid;
@@ -79,7 +77,7 @@ public class MapsActivity extends AppCompatActivity implements
         positionsModel = new Positions(extras.getString("address"), extras.getString("userId")
                 , (Map<String, String>) extras.getSerializable("Positions"), extras.getString("username"));
         positionsModel.setMapsActivityNotifier(this);
-        tToolbar = findViewById(R.id.toolbar);
+        Toolbar tToolbar = findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
         UserNametext.setText(positionsModel.getUserName());
         //update groupmap
@@ -117,7 +115,8 @@ public class MapsActivity extends AppCompatActivity implements
                         startActivity(intent);
                     }
 
-                } else {
+                }
+                else{
                     mMap.clear();
                     positionsModel.setGroupName(item.toString());
                     baseConnection.getMyPosition(positionsModel);
@@ -128,7 +127,7 @@ public class MapsActivity extends AppCompatActivity implements
             }
 
         });
-        bToolbar = findViewById(R.id.toolbar3);
+        Toolbar bToolbar = findViewById(R.id.toolbar3);
         userAddress = (String) extras.get("address");
         userid = (String) extras.get("userId");
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -138,7 +137,6 @@ public class MapsActivity extends AppCompatActivity implements
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 PackageManager.PERMISSION_GRANTED);
     }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -156,8 +154,8 @@ public class MapsActivity extends AppCompatActivity implements
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMarkerClickListener(this);
         baseConnection.getMyPosition(positionsModel);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 uploadLocation = location;
@@ -170,7 +168,7 @@ public class MapsActivity extends AppCompatActivity implements
 
             @Override
             public void onProviderDisabled(@NonNull String provider) {
-                Toast.makeText(MapsActivity.this,"GPS is turned off.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, "GPS is turned off.", Toast.LENGTH_SHORT).show();
                 finish();
             }
 
@@ -242,8 +240,8 @@ public class MapsActivity extends AppCompatActivity implements
     public boolean onMarkerClick(@NonNull Marker marker) {
         Intent intent = new Intent(this, ShowActivity.class);
         int groupid = 0;
-        if (positionsModel.getGroupName() != null) {
-            groupid = Integer.valueOf(positionsModel.getGroupId());
+        if(positionsModel.getGroupName()!= null){
+            groupid = Integer.parseInt(positionsModel.getGroupId());
         }
         intent.putExtra("userid", Integer.valueOf(userid));
         intent.putExtra("groupid", groupid);
@@ -274,6 +272,7 @@ public class MapsActivity extends AppCompatActivity implements
             baseConnection.getMyPosition(positionsModel);
         }
     }
+
     @Override
     public void parsePositions() {
         Intent intent = new Intent(this, MapsActivity.class);
@@ -282,6 +281,6 @@ public class MapsActivity extends AppCompatActivity implements
         intent.putExtra("address",positionsModel.getEmail());
         intent.putExtra("userId",positionsModel.getUserId());
         startActivity(intent);
-
+        finish();
     }
 }

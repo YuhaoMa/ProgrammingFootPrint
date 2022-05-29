@@ -26,10 +26,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
     private TextView passwd;
     private RequestQueue requestQueue;
     private TextView sees;
-    private static ArrayList<ArrayList<String>> UserData;
-    private static boolean check = false;
-    private Positions positions;
-    private  String address;
     private UserModel userModel;
     private Json baseConnect;
     @Override
@@ -96,8 +92,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
         dialog.show();
     }
 
-    public void setEmail(String Emailaddress){ address = Emailaddress;}
-
     @Override
     public void jumpToMap() {
         baseConnect.LoginSuccessfully(userModel);
@@ -121,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
                     builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            if(textPassword.getText().toString()  != "")
+                            if(!textPassword.getText().toString().equals(""))
                             {
                                 userModel.setPassword(textPassword.getText().toString());
                                 AlertDialog.Builder builder3 = new AlertDialog.Builder(MainActivity.this);

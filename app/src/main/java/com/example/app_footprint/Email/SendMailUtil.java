@@ -54,9 +54,11 @@ public class SendMailUtil {
             mailInfo.setContent("Congratulations! Your \""+groupName+"\" group has been created successfully!\n" +
                     "Please save the invitation code: "+code+".\n" +
                     "Send invitation codes to invite others to join your group!🙂"); // 注册group邮件文本
+            break;
         case 3:
             mailInfo.setContent("Forgot your password? \n"+"Copy the verification code below : \n         "+
                     code+"\n and set your new password");
+            break;
     }
 
 

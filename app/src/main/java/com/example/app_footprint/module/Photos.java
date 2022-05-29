@@ -1,7 +1,10 @@
 package com.example.app_footprint.module;
 
+import android.os.Build;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Photos extends AbstractPhotos{
     private int groupId;
@@ -58,4 +61,5 @@ public class Photos extends AbstractPhotos{
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
 }
