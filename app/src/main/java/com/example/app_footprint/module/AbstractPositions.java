@@ -9,6 +9,8 @@ public abstract class AbstractPositions{
     protected MainActivityNotifier mainActivityNotifier;
     protected String email;
     protected Map<String,String> groupMap;
+    protected String userName;
+    protected  String userId;
     public final void setMapsActivityNotifier(MapsActivityNotifier mapsActivityNotifier){
         this.mapsActivityNotifier = mapsActivityNotifier;
     }
@@ -28,7 +30,21 @@ public abstract class AbstractPositions{
         return groupMap;
     }
 
-    public void setGroupMap(Map<String, String> groupMap) {
-        this.groupMap = groupMap;
+    public void setGroupMap(Map<String, String> groupMap) { };
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

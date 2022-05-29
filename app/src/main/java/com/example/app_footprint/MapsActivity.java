@@ -56,6 +56,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.app_footprint.databinding.ActivityMapsBinding;
 
+import java.io.Serializable;
 import java.security.acl.Group;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -276,6 +277,7 @@ public class MapsActivity extends AppCompatActivity implements
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void setMarker(List<Position> positionList) {
+
         mMap.clear();
         positionList.forEach((Position position)->{
             mMap.addMarker(new MarkerOptions().position(position.getLatLng())
@@ -285,10 +287,6 @@ public class MapsActivity extends AppCompatActivity implements
 
     }
 
-    @Override
-    public void refresh() {
-        System.out.println("ddd");
-    }
 
     @Override
     protected void onStart() {
@@ -296,5 +294,15 @@ public class MapsActivity extends AppCompatActivity implements
         if (positionsModel.getGroupId() != null) {
             baseConnection.getMyPosition(positionsModel);
         }
+    }
+    @Override
+    public void parsePositions() {
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("Positions",(Serializable) positionsModel.getGroupMap());
+        intent.putExtra("username",positionsModel.getUserName());
+        intent.putExtra("address",positionsModel.getEmail());
+        intent.putExtra("userId",positionsModel.getUserId());
+        startActivity(intent);
+
     }
 }

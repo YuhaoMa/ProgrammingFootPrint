@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
         }
         else
         {
-            userModel.setAddress(user);
+
+            userModel.setEmail(user);
             userModel.setPassword(password);
             baseConnect.getUserInfo(userModel,sees);
         }
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
                     dialog1.show();
                 }
                 else{
-                    userModel.setAddress(address);
+                    userModel.setEmail(emailaddress);
                     baseConnect.forgetMyPassword(userModel);
                 }
 
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
 
     @Override
     public void jumpToMap() {
-        System.out.println(userModel.getAddress());
+        System.out.println(userModel.getEmail());
         System.out.println("!!!!!!!!");
         System.out.println(userModel.getEmail());
         baseConnect.LoginSuccessfully(userModel);
@@ -187,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
         Toast.makeText(this, "Login Successfully", Toast.LENGTH_SHORT).show();
         intent.putExtra("Positions",(Serializable) userModel.getGroupMap());
         intent.putExtra("username",userModel.getUserName());
-        intent.putExtra("address",userModel.getAddress());
+        intent.putExtra("address",userModel.getEmail());
         intent.putExtra("userId",userModel.getUserId());
         startActivity(intent);
     }

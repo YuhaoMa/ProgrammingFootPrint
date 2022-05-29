@@ -23,6 +23,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_footprint.Email.GenerateCode;
 import com.example.app_footprint.Email.SendMailUtil;
+import com.example.app_footprint.module.AbstractPositions;
 import com.example.app_footprint.module.Photo;
 import com.example.app_footprint.module.PhotoActivityModel;
 import com.example.app_footprint.module.Photos;
@@ -54,7 +55,7 @@ public class Json extends AppCompatActivity {
     public void getUserInfo(UserModel inUser,TextView textView)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
-                , url + "getUserInfo/" + inUser.getAddress(), null,
+                , url + "getUserInfo/" + inUser.getEmail(), null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
@@ -84,13 +85,13 @@ public class Json extends AppCompatActivity {
 
     public void forgetMyPassword(UserModel inUser)
     {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + inUser.getAddress(),
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url + "getUserInfo/" + inUser.getEmail(),
                 null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try{
-                            if(inUser.getAddress().equals(response.getJSONObject(0).getString("emailaddress"))){
+                            if(inUser.getEmail().equals(response.getJSONObject(0).getString("emailaddress"))){
                                 inUser.setSendCode();
                                 inUser.setUserId(response.getJSONObject(0).getString("idUsers"));
                                 inUser.setUserName(response.getJSONObject(0).getString("Name"));
@@ -108,18 +109,16 @@ public class Json extends AppCompatActivity {
                 });
         requestQueue.add(jsonArrayRequest);
     }
-
-    public void LoginSuccessfully(UserModel inModel)
+    public void LoginSuccessfully(AbstractPositions p)
     {
-        System.out.println(inModel.getEmail());
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
-                , url+ "getGroup/"+inModel.getAddress(), null,
+                , url+ "getGroup/"+p.getEmail(), null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try
                         {
-                            inModel.setGroupMap(setMap(response));
+                            p.setGroupMap(setMap(response));
                         }
                         catch( JSONException e )
                         {
@@ -137,44 +136,7 @@ public class Json extends AppCompatActivity {
                 }
         );
         requestQueue.add(jsonArrayRequest);
-        //return inPosition;
-    }
 
-    public void LoginSuccessfully(Positions inModel,View caller)
-    {
-        System.out.println(inModel.getEmail());
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET
-                , url+ "getGroup/"+inModel.getEmail(), null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try
-                        {   inModel.setGroupMap(setMap(response));
-                            Intent intent = new Intent(controller, MapsActivity.class);
-                            intent.putExtra("Positions",(Serializable) inModel.getGroupMap());
-                            intent.putExtra("username",inModel.getUserName());
-                            intent.putExtra("address",inModel.getEmail());
-                            intent.putExtra("userId",inModel.getUserId());
-                            controller.startActivity(intent);
-                            finish();
-                        }
-                        catch( JSONException e )
-                        {
-                            Log.e( "Database", e.getMessage(), e );
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        error.printStackTrace();
-                    }
-                }
-        );
-        requestQueue.add(jsonArrayRequest);
-        //return inPosition;
     }
 
     public void SearchGroup(String code,Positions inModel,View caller)
@@ -232,7 +194,7 @@ public class Json extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response)
                     {
-                        LoginSuccessfully(inModel,caller);
+                        LoginSuccessfully(inModel);
                     }
                 },
                 new Response.ErrorListener()
@@ -348,7 +310,7 @@ public class Json extends AppCompatActivity {
         requestQueue.add(submitRequest);
     }
 
-    public Positions getMyPosition(Positions inPositions)
+    public void getMyPosition(Positions inPositions)
     {
         JsonArrayRequest jsonArrayRequest;
         if(inPositions.getGroupName()==null) {
@@ -360,6 +322,7 @@ public class Json extends AppCompatActivity {
                     try
                     {
                         inPositions.setMyPositions(setPosition(response));
+                        System.out.println("MyPositions!!!!!!!!!!!!!+"+inPositions.getMyPositions());
                     }
                     catch( JSONException e )
                     {
@@ -396,7 +359,6 @@ public class Json extends AppCompatActivity {
             });
         }
         requestQueue.add(jsonArrayRequest);
-        return inPositions;
     }
 
     public void addPhotoInfo(PhotoActivityModel inmodel,View caller)
@@ -460,7 +422,7 @@ public class Json extends AppCompatActivity {
     public void changePassword(UserModel inUser)
     {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
-                url+"changePassword/"+inUser.getPassword()+"/"+inUser.getAddress(), null,
+                url+"changePassword/"+inUser.getPassword()+"/"+inUser.getEmail(), null,
                 new Response.Listener<JSONArray>()
                 {
                     @Override
@@ -597,5 +559,4 @@ public class Json extends AppCompatActivity {
         }
         return myPhotos;
     }
-
 }
