@@ -1,6 +1,7 @@
 package com.example.app_footprint;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +22,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.ActionProvider;
@@ -66,8 +68,7 @@ import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,OnMapReadyCallback, GoogleMap.OnMarkerClickListener
-        , MapsActivityNotifier
-{
+        , MapsActivityNotifier {
     private RequestQueue requestQueue;
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -85,17 +86,18 @@ public class MapsActivity extends AppCompatActivity implements
     private TextView UserNametext;
     private Positions positionsModel;
     private Json baseConnection;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         requestQueue = Volley.newRequestQueue(this);
-        baseConnection = new Json(requestQueue,this);
+        baseConnection = new Json(requestQueue, this);
         baseConnection.setController(MapsActivity.this);
         Bundle extras = getIntent().getExtras();
-        positionsModel = new Positions(extras.getString("address"),extras.getString("userId")
-                ,(Map<String, String>) extras.getSerializable("Positions"),extras.getString("username"));
+        positionsModel = new Positions(extras.getString("address"), extras.getString("userId")
+                , (Map<String, String>) extras.getSerializable("Positions"), extras.getString("username"));
         positionsModel.setMapsActivityNotifier(this);
         tToolbar = (Toolbar) findViewById(R.id.toolbar);
         UserNametext = findViewById(R.id.textView9);
@@ -103,43 +105,44 @@ public class MapsActivity extends AppCompatActivity implements
         //update groupmap
         setSupportActionBar(tToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        Intent intent = new Intent(this,PhotoActivity.class);
+        Intent intent = new Intent(this, PhotoActivity.class);
         tToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
 
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 int itemId = item.getItemId();
-                if(itemId == R.id.addP){
-                    if(positionsModel.getGroupName()==null)
-                        {
-                            Toast.makeText(MapsActivity.this,"You are not in a group",
-                                    Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {   ArrayList<Double> myLatitude = new ArrayList<>();
+                if (itemId == R.id.addP) {
+                    if (positionsModel.getGroupName() == null) {
+                        Toast.makeText(MapsActivity.this, "You are not in a group",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        ArrayList<Double> myLatitude = new ArrayList<>();
                         ArrayList<Double> myLongitude = new ArrayList<>();
-                        for(int i = 0 ; i < positionsModel.getMyPositions().size(); i ++)
-                        {
-                            myLatitude.add(positionsModel.getMyPositions().get(i).getLatLng().latitude);
-                            myLongitude.add(positionsModel.getMyPositions().get(i).getLatLng().longitude);
-                        }
-                        intent.putExtra("address",userAddress);
-                        intent.putExtra("date",date);
-                        intent.putExtra("latitude",uploadLocation.getLatitude());
-                        intent.putExtra("longitude",uploadLocation.getLongitude());
-                        intent.putExtra("userid",userid);
-                        intent.putExtra("groupId",positionsModel.getGroupId());
-                        intent.putExtra("myLatitude",myLatitude);
-                        intent.putExtra("myLongitude",myLongitude);
+
+                       //Lambda
+                        positionsModel.getMyPositions().forEach((Position p)->{
+                            myLatitude.add(p.getLatLng().latitude);
+                            myLongitude.add(p.getLatLng().longitude);
+                        });
+
+
+                        intent.putExtra("address", userAddress);
+                        intent.putExtra("date", date);
+                        intent.putExtra("latitude", uploadLocation.getLatitude());
+                        intent.putExtra("longitude", uploadLocation.getLongitude());
+                        intent.putExtra("userid", userid);
+                        intent.putExtra("groupId", positionsModel.getGroupId());
+                        intent.putExtra("myLatitude", myLatitude);
+                        intent.putExtra("myLongitude", myLongitude);
                         startActivity(intent);
                     }
 
-                }
-                else{
+                } else {
                     mMap.clear();
                     positionsModel.setGroupName(item.toString());
                     baseConnection.getMyPosition(positionsModel);
-                    Toast.makeText(MapsActivity.this, "To Group "+positionsModel.getGroupName()
+                    Toast.makeText(MapsActivity.this, "To Group " + positionsModel.getGroupName()
                             , Toast.LENGTH_SHORT).show();
                 }
                 return true;
@@ -156,6 +159,7 @@ public class MapsActivity extends AppCompatActivity implements
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 PackageManager.PERMISSION_GRANTED);
     }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -219,8 +223,8 @@ public class MapsActivity extends AppCompatActivity implements
         Toast.makeText(this, "Return to My Homepage", Toast.LENGTH_SHORT).show();
     }
 
-    public void searchGroup(View view){
-        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+    public void searchGroup(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         EditText code = new EditText(this);
         builder.setTitle("Search Group");
         builder.setMessage("Please enter the code of the group you want to join");
@@ -228,26 +232,27 @@ public class MapsActivity extends AppCompatActivity implements
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                baseConnection.SearchGroup(code.getText().toString(),positionsModel,view);
-                AlertDialog.Builder builder1=new AlertDialog.Builder(MapsActivity.this);
+                baseConnection.SearchGroup(code.getText().toString(), positionsModel, view);
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(MapsActivity.this);
                 builder1.setTitle("Reminder");
-                }
-            });
-        builder.setNegativeButton("Cancel",null);
-        AlertDialog dialog=builder.create();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        AlertDialog dialog = builder.create();
         dialog.show();
 
     }
-    public void createGroup(View view)
-    {
-        baseConnection.createNewGroup(positionsModel,view);
+
+    public void createGroup(View view) {
+        baseConnection.createNewGroup(positionsModel, view);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.maps_menu,menu);
+        getMenuInflater().inflate(R.menu.maps_menu, menu);
         int i = 0;
-        for(String name: positionsModel.getGroupMap().keySet()){
-            menu.add(1,1,i,name);
+        for (String name : positionsModel.getGroupMap().keySet()) {
+            menu.add(1, 1, i, name);
             i++;
         }
         return true;
@@ -255,27 +260,29 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
-        Intent intent = new Intent(this,ShowActivity.class);
+        Intent intent = new Intent(this, ShowActivity.class);
         int groupid = 0;
-        if(positionsModel.getGroupName()!= null){
+        if (positionsModel.getGroupName() != null) {
             groupid = Integer.valueOf(positionsModel.getGroupId());
         }
-        intent.putExtra("userid",Integer.valueOf(userid));
-        intent.putExtra("groupid",groupid);
-        intent.putExtra("latitude",marker.getPosition().latitude);
-        intent.putExtra("longitude",marker.getPosition().longitude);
+        intent.putExtra("userid", Integer.valueOf(userid));
+        intent.putExtra("groupid", groupid);
+        intent.putExtra("latitude", marker.getPosition().latitude);
+        intent.putExtra("longitude", marker.getPosition().longitude);
         startActivity(intent);
         return false;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void setMarker(List<Position> positionList) {
         mMap.clear();
-        for(int i = 0; i < positionList.size();i++){
-           mMap.addMarker(new MarkerOptions().position(positionList.get(i).getLatLng())
-                    .title(positionList.get(i).getDate())
-                    .snippet("Recently posted by : "+positionList.get(i).getName()));
-        }
+        positionList.forEach((Position position)->{
+            mMap.addMarker(new MarkerOptions().position(position.getLatLng())
+                    .title(position.getDate())
+                    .snippet("Recently posted by : " + position.getName()));
+        });
+
     }
 
     @Override
@@ -286,8 +293,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        if(positionsModel.getGroupId() != null)
-        {
+        if (positionsModel.getGroupId() != null) {
             baseConnection.getMyPosition(positionsModel);
         }
     }

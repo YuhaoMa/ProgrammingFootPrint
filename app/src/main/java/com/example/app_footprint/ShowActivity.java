@@ -1,8 +1,10 @@
 package com.example.app_footprint;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridView;
@@ -50,16 +52,19 @@ public class ShowActivity extends AppCompatActivity implements ShowActivityNotif
         finish();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void setGridView(List<Photo> photosList) {
-        for(int i = 0; i< photosList.size();i++){
-            System.out.println(photosList.get(i).toString());
-        }
+        photosList.forEach(System.out::println);
+
         gridView = (GridView) findViewById(R.id.view_photo);
         List<Map<String,Object>> data = new ArrayList<Map<String, Object>>();
-        for(int i = 0; i < photosList.size();i++){
-            setData(photosList.get(i).getBitmap(),photosList.get(i).getDate(),photosList.get(i).getName(),data);
-        }
+
+        //Lambda
+        photosList.forEach((Photo p)->{
+            setData(p.getBitmap(),p.getDate(),p.getName(),data);
+        });
+
         simpleAdapter = new SimpleAdapter(this,data,R.layout.grid_item,
                 new String[]{"img","date","name"},new int[]{R.id.img_item,R.id.date_item,R.id.name_item});
         simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {

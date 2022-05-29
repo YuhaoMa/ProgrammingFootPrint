@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityNotif
 
             }
         });
+        builder.setNegativeButton("Cancel",null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }

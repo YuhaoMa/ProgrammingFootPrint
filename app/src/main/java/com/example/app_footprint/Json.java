@@ -104,10 +104,6 @@ public class Json extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        //builder.setMessage("Email address can't be empty.");
-                        //builder.setPositiveButton("Close",null);
-                        //AlertDialog dialog1 = builder.create();
-                        //dialog1.show();
                     }
                 });
         requestQueue.add(jsonArrayRequest);
@@ -122,18 +118,8 @@ public class Json extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         try
-                        {   String groupName;
-                            String groupid;
-                            Map<String, String> tempGroupMap = new HashMap<>();
-                            for(int i=0;i<response.length();i++)
-                            {
-                                JSONObject curObject = response.getJSONObject( i );
-                                groupid = curObject.getString("idGroup");
-                                groupName = curObject.getString("GroupName");
-                                tempGroupMap.put(groupName,groupid);
-                            }
-                            inModel.setGroupMap(tempGroupMap);
-
+                        {
+                            inModel.setGroupMap(setMap(response));
                         }
                         catch( JSONException e )
                         {
@@ -163,17 +149,7 @@ public class Json extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         try
-                        {   String groupName;
-                            String groupid;
-                            Map<String, String> tempGroupMap = new HashMap<>();
-                            for(int i=0;i<response.length();i++)
-                            {
-                                JSONObject curObject = response.getJSONObject( i );
-                                groupid = curObject.getString("idGroup");
-                                groupName = curObject.getString("GroupName");
-                                tempGroupMap.put(groupName,groupid);
-                            }
-                            inModel.setGroupMap(tempGroupMap);
+                        {   inModel.setGroupMap(setMap(response));
                             Intent intent = new Intent(controller, MapsActivity.class);
                             intent.putExtra("Positions",(Serializable) inModel.getGroupMap());
                             intent.putExtra("username",inModel.getUserName());
@@ -381,33 +357,14 @@ public class Json extends AppCompatActivity {
                     , new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray response) {
-                    List<Position> myPositions = new ArrayList<>();
                     try
                     {
-                        JSONObject curObject;
-                        LatLng latLng;
-                        String date;
-                        String name;
-                        for(int i = 0; i < response.length();i++){
-                            curObject = response.getJSONObject(i);
-                            latLng = new LatLng(
-                                    curObject.getDouble("Lat"),
-                                    curObject.getDouble("Lon"));
-                            date = curObject.getString("date");
-                            name = curObject.getString("Name");
-                            Position position = new Position(latLng,date,name);
-                            /*if(i==response.length()-1){
-                                currentLatitude = Double.parseDouble(curObject.getString("Lat"));
-                                currentLongitude = Double.parseDouble(curObject.getString("Lon"));
-                            }*/
-                            myPositions.add(position);
-                        }
+                        inPositions.setMyPositions(setPosition(response));
                     }
                     catch( JSONException e )
                     {
                         Log.e( "Database", e.getMessage(), e );
                     }
-                    inPositions.setMyPositions(myPositions);
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -422,29 +379,14 @@ public class Json extends AppCompatActivity {
                     new Response.Listener<JSONArray>() {
                         @Override
                         public void onResponse(JSONArray response) {
-                            List<Position> myPositions = new ArrayList<>();
                             try
                             {
-                                JSONObject curObject;
-                                LatLng latLng ;
-                                String date;
-                                String name;
-                                for(int i = 0; i < response.length();i++){
-                                    curObject = response.getJSONObject(i);
-                                    latLng = new LatLng(
-                                            curObject.getDouble("Lat"),
-                                            curObject.getDouble("Lon"));
-                                    date = curObject.getString("date");
-                                    name = curObject.getString("Name");
-                                    Position position = new Position(latLng,date,name);
-                                    myPositions.add(position);
-                                }
+                                inPositions.setMyPositions(setPosition(response));
                             }
                             catch( JSONException e )
                             {
                                 Log.e( "Database", e.getMessage(), e );
                             }
-                            inPositions.setMyPositions(myPositions);
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -552,27 +494,14 @@ public class Json extends AppCompatActivity {
                         @Override
                         public void onResponse(JSONArray response)
                         {
-                            List<Photo> myPhotos = new ArrayList<>();
                             try
                             {
-                                JSONObject curObject;
-                                String photoBase;
-                                String name;
-                                String date;
-                                for(int i = 0; i < response.length();i++){
-                                    curObject = response.getJSONObject(i);
-                                    photoBase = curObject.getString("PhotoBase");
-                                    name = curObject.getString("Name");
-                                    date = curObject.getString("date");
-                                    Photo photo = new Photo(name,date,photoBase);
-                                    myPhotos.add(photo);
-                                }
+                                photos.setPhotos(setPhoto(response));
                             }
                             catch( JSONException e )
                             {
                                 Log.e( "Database", e.getMessage(), e );
                             }
-                            photos.setPhotos(myPhotos);
                         }
                     },
                     new Response.ErrorListener()
@@ -597,27 +526,14 @@ public class Json extends AppCompatActivity {
                         @Override
                         public void onResponse(JSONArray response)
                         {
-                            List<Photo> myPhotos = new ArrayList<>();
                             try
                             {
-                                JSONObject curObject = new JSONObject();
-                                String photoBase;
-                                String name;
-                                String date;
-                                for(int i = 0; i < response.length();i++){
-                                    curObject = response.getJSONObject(i);
-                                    photoBase = curObject.getString("PhotoBase");
-                                    name = curObject.getString("Name");
-                                    date = curObject.getString("date");
-                                    Photo photo = new Photo(name,date,photoBase);
-                                    myPhotos.add(photo);
-                                }
+                                photos.setPhotos(setPhoto(response));
                             }
                             catch( JSONException e )
                             {
                                 Log.e( "Database", e.getMessage(), e );
                             }
-                            photos.setPhotos(myPhotos);
                         }
                     },
                     new Response.ErrorListener()
@@ -634,4 +550,52 @@ public class Json extends AppCompatActivity {
     }
 
     public void setController(Context context){this.controller = context;}
+    private  Map<String, String> setMap(JSONArray jsonArray) throws JSONException {
+        String groupName;
+        String groupid;
+        Map<String, String>  tempGroupMap = new HashMap<>();
+        for(int i=0;i<jsonArray.length();i++)
+        {
+            JSONObject curObject = jsonArray.getJSONObject( i );
+            groupid = curObject.getString("idGroup");
+            groupName = curObject.getString("GroupName");
+            tempGroupMap.put(groupName,groupid);
+        }
+        return tempGroupMap;
+    }
+    private  List<Position>      setPosition(JSONArray jsonArray) throws JSONException {
+        List<Position> myPositions = new ArrayList<>();
+            JSONObject curObject;
+            LatLng latLng ;
+            String date;
+            String name;
+            for(int i = 0; i < jsonArray.length();i++){
+                curObject = jsonArray.getJSONObject(i);
+                latLng = new LatLng(
+                        curObject.getDouble("Lat"),
+                        curObject.getDouble("Lon"));
+                date = curObject.getString("date");
+                name = curObject.getString("Name");
+                Position position = new Position(latLng,date,name);
+                myPositions.add(position);
+            }
+        return myPositions;
+    }
+    private  List<Photo>         setPhoto(JSONArray jsonArray) throws JSONException {
+        List<Photo> myPhotos = new ArrayList<>();
+        JSONObject curObject = new JSONObject();
+        String photoBase;
+        String name;
+        String date;
+        for(int i = 0; i < jsonArray.length();i++){
+            curObject = jsonArray.getJSONObject(i);
+            photoBase = curObject.getString("PhotoBase");
+            name = curObject.getString("Name");
+            date = curObject.getString("date");
+            Photo photo = new Photo(name,date,photoBase);
+            myPhotos.add(photo);
+        }
+        return myPhotos;
+    }
+
 }
